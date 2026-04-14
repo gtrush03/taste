@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const overlay = document.getElementById('detail-overlay');
     const closeBtn = document.getElementById('overlay-close');
     const scrollContainer = overlay.querySelector('.overlay-scroll-container');
-    const triggers = document.querySelectorAll('.nav-trigger');
+    const textLogo = document.querySelector('.text-logo');
     
     let isAnimating = false;
     let currentCardId = null;
@@ -19,6 +19,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // HERO LOGO ENTRANCE ANIMATION
+    const heroLogo = document.getElementById('hero-logo');
+    setTimeout(() => {
+        if (heroLogo) heroLogo.classList.add('logo-revealed');
+    }, 150);
+    setTimeout(() => {
+        const hint = document.getElementById('hero-hint');
+        if (hint) hint.classList.add('hint-visible');
+    }, 1850);
+
     // 0. SCROLL SEQUENCE ENGINE (0 -> 1: Hero, 1 -> 2: About Us)
     const scrollHero = document.getElementById('scroll-hero');
     const heroBox = document.getElementById('hero-media-box');
@@ -27,7 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainGrid = document.getElementById('main-grid');
     const aboutReveal = document.getElementById('about-section');
     const gridCards = document.querySelectorAll('.card');
-    const navTriggers = document.querySelectorAll('.nav-trigger');
     const detailOverlay = document.getElementById('detail-overlay');
     
     // Phase-based scroll with AUTO-SNAP:
@@ -96,6 +105,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const cardP = Math.min(aboutProgress / 0.6, 1);
         
+        if (aboutProgress > 0.01 && textLogo) {
+            textLogo.classList.add('logo-fixed-center');
+        } else if (textLogo) {
+            textLogo.classList.remove('logo-fixed-center');
+        }
+
         gridCards.forEach((c, i) => {
             if (aboutProgress <= 0) {
                 c.style.transform = '';
@@ -114,16 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
             c.style.transform = `translate(${flyX}px, ${flyY}px) scale(${cardScale})`;
             c.style.opacity = cardOpacity;
             c.style.pointerEvents = aboutProgress > 0.02 ? 'none' : 'auto';
-        });
-
-        navTriggers.forEach(n => {
-            if (aboutProgress <= 0) {
-                n.style.opacity = '';
-                n.style.pointerEvents = '';
-                return;
-            }
-            n.style.opacity = Math.max(0, 1 - cardP * 2.5);
-            n.style.pointerEvents = aboutProgress > 0.02 ? 'none' : 'auto';
         });
 
         if (aboutReveal) {
@@ -274,12 +279,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                     c.style.opacity = '';
                                     c.style.pointerEvents = '';
                                 });
-                                navTriggers.forEach(n => {
-                                    n.style.opacity = '';
-                                    n.style.pointerEvents = '';
-                                });
                                 aboutReveal.classList.remove('about-visible');
                                 mainGrid._cardPositions = null;
+                                if (textLogo) textLogo.classList.remove('logo-fixed-center');
                                 hardLock(1, 1200);
                             }
                         );
@@ -311,75 +313,10 @@ document.addEventListener('DOMContentLoaded', () => {
         handleScroll(delta * 2); // Scale up touch deltas
     }, { passive: false });
 
-    // 1. NAV HOVER — elegant card reveal (photo fades away)
-    let lockedTrigger = null;
-
-    triggers.forEach(trigger => {
-        const targetClass = '.nav-target-' + trigger.getAttribute('data-target');
-        const spanLabel = trigger.querySelector('.nav-label');
-        const originalText = trigger.getAttribute('data-original');
-
-        const handleEnter = () => {
-            if (lockedTrigger) return;
-            document.querySelectorAll('.card.flipped').forEach(c => c.classList.remove('flipped'));
-            document.querySelectorAll(targetClass).forEach(c => c.classList.add('flipped'));
-        };
-
-        const handleLeave = () => {
-            if (lockedTrigger) return;
-            document.querySelectorAll(targetClass).forEach(c => c.classList.remove('flipped'));
-        };
-
-        const toggleLock = () => {
-            if (lockedTrigger === trigger) {
-                lockedTrigger = null;
-                document.querySelectorAll(targetClass).forEach(c => c.classList.remove('flipped'));
-                spanLabel.innerText = originalText;
-                trigger.classList.remove('nav-locked');
-            } else {
-                if (lockedTrigger) {
-                    const prevTarget = '.nav-target-' + lockedTrigger.getAttribute('data-target');
-                    document.querySelectorAll(prevTarget).forEach(c => c.classList.remove('flipped'));
-                    lockedTrigger.querySelector('.nav-label').innerText = lockedTrigger.getAttribute('data-original');
-                    lockedTrigger.classList.remove('nav-locked');
-                }
-                lockedTrigger = trigger;
-                document.querySelectorAll(targetClass).forEach(c => c.classList.add('flipped'));
-                spanLabel.innerText = 'close';
-                trigger.classList.add('nav-locked');
-            }
-        };
-
-        trigger.addEventListener('mouseenter', handleEnter);
-        trigger.addEventListener('mouseleave', handleLeave);
-        trigger.addEventListener('click', toggleLock);
-
-        trigger.addEventListener('touchstart', (e) => {
-            e.preventDefault(); 
-            toggleLock();
-        }, { passive: false });
-    });
-
-    // Clean up flipped states if touching outside on mobile
-    document.addEventListener('touchstart', (e) => {
-        if (!e.target.closest('.nav-trigger') && !e.target.closest('.card.flipped')) {
-            if (lockedTrigger) {
-                document.querySelectorAll('.card.flipped').forEach(c => c.classList.remove('flipped'));
-                lockedTrigger.querySelector('.nav-label').innerText = lockedTrigger.getAttribute('data-original');
-                lockedTrigger.classList.remove('nav-locked');
-                lockedTrigger = null;
-            }
-        }
-    }, { passive: true });
-
-
-    // 2. TILE CLICK TO DETAIL OVERLAY
+    // 1. TILE CLICK TO DETAIL OVERLAY
     cards.forEach(card => {
         card.addEventListener('click', (e) => {
             if (isAnimating) return;
-            // Never open detail overlay if the text panel is flipped
-            if (card.classList.contains('flipped')) return;
-
             openOverlay(card, false);
         });
     });
@@ -481,29 +418,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // =========================
-    // ABOUT PAGE — mobile expand
-    // =========================
-    const aboutCard = document.getElementById('about-card');
-    const aboutPage = document.getElementById('about-page');
-    const aboutPageClose = document.getElementById('about-page-close');
-
-    if (aboutCard && aboutPage) {
-        aboutCard.addEventListener('click', () => {
-            if (window.innerWidth > 900) return;
-            aboutPage.classList.add('is-open');
-        });
-
-        aboutPageClose.addEventListener('click', () => {
-            aboutPage.classList.remove('is-open');
-        });
-
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && aboutPage.classList.contains('is-open')) {
-                aboutPage.classList.remove('is-open');
-            }
-        });
-    }
-
-    // Custom cursor disabled — using system default
 });

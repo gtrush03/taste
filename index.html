@@ -34,21 +34,11 @@
 
     <!-- MAIN PORTFOLIO (hidden until expanded) -->
     <div class="grid-container" id="main-grid">
-        <!-- Center decorative texts -->
-        <div class="center-content text-about nav-trigger" data-target="about" data-original="about us">
-            [ <span class="nav-label">about us</span> ]
-        </div>
-
-        <div class="center-content text-logo">
-            taste<span class="logo-dot">.</span>
-        </div>
-
-        <div class="center-content text-contact nav-trigger" data-target="contact" data-original="contact">
-            [ <span class="nav-label">contact</span> ]
-        </div>
+        <!-- Center row: logo (provides spacing between card rows) -->
+        <div class="center-content text-logo">taste<span class="logo-dot">.</span></div>
 
         <!-- Cards -->
-        <div class="card card-uber-left nav-target-about" data-id="uber-brand" data-title="Uber" data-meta="Brand Campaign — 2025" data-description="A sophisticated brand exploration for Uber, emphasizing high-end design and lifestyle integration. Costs less than your friendship." data-hero="images/uber_portrait_woman_1775971386657.png">
+        <div class="card card-uber-left" data-id="uber-brand" data-title="Uber" data-meta="Brand Campaign — 2025" data-description="A sophisticated brand exploration for Uber, emphasizing high-end design and lifestyle integration. Costs less than your friendship." data-hero="images/uber_portrait_woman_1775971386657.png">
             <div class="card-inner">
                 <div class="card-front top-gradient">
                     <img src="images/uber_portrait_woman_1775971386657.png" alt="Uber" class="tile-img">
@@ -57,14 +47,10 @@
                         <p>Costs Less Than Your<br>Friendship</p>
                     </div>
                 </div>
-                <div class="card-back">
-                    <h3>About Us</h3>
-                    <p>We build elegant experiences.</p>
-                </div>
             </div>
         </div>
 
-        <div class="card card-duribody nav-target-about" data-id="duribody" data-title="Duribody" data-meta="Digital Experience — 2024" data-description="Interactive storytelling and web app platform. Blashlkaslkdasd." data-hero="images/duribody_car_1775971434384.png">
+        <div class="card card-duribody" data-id="duribody" data-title="Duribody" data-meta="Digital Experience — 2024" data-description="Interactive storytelling and web app platform. Blashlkaslkdasd." data-hero="images/duribody_car_1775971434384.png">
             <div class="card-inner">
                 <div class="card-front bottom-gradient">
                     <img src="images/duribody_car_1775971434384.png" alt="Duribody" class="tile-img">
@@ -73,14 +59,10 @@
                         <p>blashlkaslkdasd</p>
                     </div>
                 </div>
-                <div class="card-back">
-                    <h3>Our Team</h3>
-                    <p>Meet the minds behind taste.</p>
-                </div>
             </div>
         </div>
 
-        <div class="card card-life-of-dar nav-target-contact" data-id="life-of-dar" data-title="Life of Dar" data-meta="Film & Production — 2025" data-description="Cinematic direction and production for the desert road trip campaign." data-hero="images/life_of_dar_desert_1775971513244.png">
+        <div class="card card-life-of-dar" data-id="life-of-dar" data-title="Life of Dar" data-meta="Film & Production — 2025" data-description="Cinematic direction and production for the desert road trip campaign." data-hero="images/life_of_dar_desert_1775971513244.png">
             <div class="card-inner">
                 <div class="card-front bottom-gradient">
                     <img src="images/life_of_dar_desert_1775971513244.png" alt="Life of Dar" class="tile-img">
@@ -89,14 +71,10 @@
                         <p>Costs Less Than Your Friendship</p>
                     </div>
                 </div>
-                <div class="card-back">
-                    <h3>Get in Touch</h3>
-                    <p>hello@taste.com<br>+1 (555) 123-4567</p>
-                </div>
             </div>
         </div>
 
-        <div class="card card-uber-right nav-target-contact" data-id="uber-running" data-title="Uber Runtime" data-meta="Active Campaign — 2026" data-description="Night mode cinematography focusing on movement and neon aesthetics." data-hero="images/uber_running_1775971634723.png">
+        <div class="card card-uber-right" data-id="uber-running" data-title="Uber Runtime" data-meta="Active Campaign — 2026" data-description="Night mode cinematography focusing on movement and neon aesthetics." data-hero="images/uber_running_1775971634723.png">
             <div class="card-inner">
                 <div class="card-front bottom-gradient">
                     <img src="images/uber_running_1775971634723.png" alt="Uber" class="tile-img">
@@ -104,10 +82,6 @@
                         <h2>Uber</h2>
                         <p>Costs Less Than Your<br>Friendship</p>
                     </div>
-                </div>
-                <div class="card-back">
-                    <h3>Find Us</h3>
-                    <p>123 Creative Ave, NY<br>@taste.studio</p>
                 </div>
             </div>
         </div>
@@ -139,66 +113,56 @@
 
     <!-- ABOUT SECTION (revealed on scroll past grid) -->
     <section id="about-section">
-        <div class="about-wing about-wing--left" id="about-card">
-            <h3>About Us</h3>
-            <p class="wing-desc">A collective of directors, designers, and dreamers crafting visual narratives that move culture forward.</p>
-            <div class="wing-stats">
-                <div class="stat-item">
-                    <span class="stat-number">47</span>
-                    <span class="stat-label">Projects</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">12</span>
-                    <span class="stat-label">Brands</span>
-                </div>
+
+        <!-- LEFT COLUMN — About Us -->
+        <div class="about-col about-col--left">
+            <div class="about-text-block">
+                <p class="about-col__text about-col__text--lead">
+                    <strong>Yelisey Kazakevich</strong> and <strong>Andy Bae</strong>
+                    are a <strong>Director/DP</strong> collective,
+                    specializing in commercial production and branded content.
+                </p>
+                <p class="about-col__text about-col__text--body">
+                    With experience in the motion picture industry,
+                    they have cultivated their
+                    <span class="about-wordmark">taste</span>
+                    through their background at
+                    <em>New York University</em> and <em>Boston University</em>,
+                    and worked with brands like
+                    <strong>Infiniti</strong>, <strong>LA Tourism</strong>
+                    and <strong>Macy's</strong> and on productions for
+                    <strong>Netflix</strong>, <strong>Hulu</strong>
+                    and <strong>Apple TV+</strong>.
+                </p>
+                <p class="about-col__text about-tagline">
+                    We bring <strong>flavor</strong> to your brand.
+                </p>
             </div>
         </div>
 
-        <div class="about-center">
-            <div class="about-upper">
-                <h2 class="about-heading">Every frame<br>is deliberate.</h2>
-            </div>
-            <div class="about-logo-gap"></div>
+        <!-- CENTER COLUMN — Logo spacer -->
+        <div class="about-col about-col--center">
+            <div class="about-logo-spacer"></div>
+            <span class="about-city">New York City</span>
         </div>
 
-        <div class="about-wing about-wing--right">
-            <h3>Contact</h3>
-            <div class="wing-links">
-                <a href="mailto:hello@taste.studio">hello@taste.studio</a>
-                <span>Brooklyn, New York</span>
-                <a href="https://instagram.com/taste">@taste.studio</a>
+        <!-- RIGHT COLUMN — Contact -->
+        <div class="about-col about-col--right">
+            <div class="contact-person">
+                <span class="contact-name">Yelisey Kazakevich</span>
+                <span class="contact-role">Director/Producer</span>
+                <a href="tel:8574379930">857.437.9930</a>
+                <a href="mailto:yelisey.kay@gmail.com">yelisey.kay@gmail.com</a>
+            </div>
+            <div class="contact-person">
+                <span class="contact-name">Andy Bae</span>
+                <span class="contact-role">Director of Photography</span>
+                <a href="tel:4084392422">408.439.2422</a>
+                <a href="mailto:andybae333@gmail.com">andybae333@gmail.com</a>
             </div>
         </div>
+
     </section>
-
-    <!-- ABOUT FULL PAGE (expands from about card on mobile) -->
-    <div class="about-page" id="about-page">
-        <button class="about-page__close" id="about-page-close">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-        <div class="about-page__content">
-            <h2>About Us</h2>
-            <p class="about-page__lead">We don't just create — we curate taste.</p>
-            <p class="about-page__body">A collective of directors, designers, and dreamers crafting visual narratives that move culture forward. Every frame is deliberate. We keep it lean because good work comes from tight teams with shared vision.</p>
-            <div class="about-page__stats">
-                <div class="about-page__stat">
-                    <span class="about-page__stat-num">47</span>
-                    <span class="about-page__stat-label">Projects Delivered</span>
-                </div>
-                <div class="about-page__stat">
-                    <span class="about-page__stat-num">12</span>
-                    <span class="about-page__stat-label">Global Brands</span>
-                </div>
-                <div class="about-page__stat">
-                    <span class="about-page__stat-num">∞</span>
-                    <span class="about-page__stat-label">Ambition</span>
-                </div>
-            </div>
-            <div class="about-page__footer">
-                <span>Brooklyn, New York</span>
-            </div>
-        </div>
-    </div>
 
     <!-- DETAIL OVERLAY -->
     <div id="detail-overlay" style="clip-path: inset(0 0 100% 0);">
