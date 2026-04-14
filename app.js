@@ -242,7 +242,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Accumulator for scroll intent detection
     let scrollAccum = 0;
     let scrollAccumTimer = null;
-    const SNAP_THRESHOLD = 60;
+
+    // Mobile gets a lower distance threshold and a longer reset window.
+    // Desktop uses raw pixel delta (wheel), mobile uses normalized touch delta.
+    // FLING_VELOCITY: px/ms — if swipe speed exceeds this, trigger immediately (no accumulation needed)
+    const isTouchDevice = () => window.matchMedia('(pointer: coarse)').matches;
+    const SNAP_THRESHOLD   = () => isTouchDevice() ? 32 : 60;
+    const ACCUM_RESET_MS   = () => isTouchDevice() ? 700 : 400;
+    const FLING_VELOCITY   = 0.45; // px/ms — clear intentional flick
 
     function resetAccum() {
         scrollAccum = 0;
@@ -262,18 +269,21 @@ document.addEventListener('DOMContentLoaded', () => {
         switch (phase) {
             case 0: { // Hero — scroll-driven but auto-snaps
                 const delta = Math.min(Math.abs(deltaY) * 0.0015, 0.03);
+                // On mobile a quick flick (high velocity) triggers immediately
+                const heroSnapAt = isTouchDevice() ? 0.08 : 0.18;
                 if (scrollingDown) {
                     heroProgress = Math.min(heroProgress + delta, 1);
                     renderHero();
-                    if (heroProgress >= 0.18 && heroProgress < 1) {
+                    const shouldSnap = heroProgress >= heroSnapAt || touchVelocity > FLING_VELOCITY;
+                    if (shouldSnap && heroProgress < 1) {
                         autoSnap(
                             () => heroProgress,
                             (v) => { heroProgress = v; },
                             1,
                             renderHero,
                             () => hardLock(1, 800)
-                    );
-                } else if (heroProgress >= 1) {
+                        );
+                    } else if (heroProgress >= 1) {
                         hardLock(1, 800);
                     }
                 } else if (heroProgress > 0) {
@@ -284,15 +294,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             case 1: { // Grid HARD LOCKED — accumulate scroll intent
-                // Build up scroll intent — need deliberate scrolling to leave
                 if (scrollingDown) {
                     scrollAccum += Math.abs(deltaY);
-                    // Reset accumulator if user stops scrolling for 400ms
                     if (scrollAccumTimer) clearTimeout(scrollAccumTimer);
-                    scrollAccumTimer = setTimeout(resetAccum, 400);
+                    scrollAccumTimer = setTimeout(resetAccum, ACCUM_RESET_MS());
 
-                    if (scrollAccum >= SNAP_THRESHOLD) {
+                    const triggered = scrollAccum >= SNAP_THRESHOLD() || touchVelocity > FLING_VELOCITY;
+                    if (triggered) {
                         resetAccum();
+                        touchVelocity = 0;
                         transitionDir = 1;
                         aboutProgress = 0;
                         // Pre-compute card positions before entering RAF loop
@@ -318,10 +328,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (scrollingUp) {
                     scrollAccum += Math.abs(deltaY);
                     if (scrollAccumTimer) clearTimeout(scrollAccumTimer);
-                    scrollAccumTimer = setTimeout(resetAccum, 400);
+                    scrollAccumTimer = setTimeout(resetAccum, ACCUM_RESET_MS());
 
-                    if (scrollAccum >= SNAP_THRESHOLD) {
+                    const triggeredUp = scrollAccum >= SNAP_THRESHOLD() || touchVelocity > FLING_VELOCITY;
+                    if (triggeredUp) {
                         resetAccum();
+                        touchVelocity = 0;
                         pauseTileVideos(); // returning to hero — grid going off screen
                         autoSnap(
                             () => heroProgress,
@@ -339,10 +351,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (scrollingUp) {
                     scrollAccum += Math.abs(deltaY);
                     if (scrollAccumTimer) clearTimeout(scrollAccumTimer);
-                    scrollAccumTimer = setTimeout(resetAccum, 400);
-
-                    if (scrollAccum >= SNAP_THRESHOLD) {
+                    scrollAccumTimer = setTimeout(() => {
                         resetAccum();
+                        // Spring back the rubber-band on timeout
+                        if (aboutReveal) aboutReveal.style.transform = '';
+                    }, ACCUM_RESET_MS());
+
+                    // Rubber-band: nudge about section down slightly to show scroll is registering
+                    if (aboutReveal && isTouchDevice()) {
+                        const pull = Math.min(scrollAccum * 0.18, 18); // max 18px nudge
+                        aboutReveal.style.transform = `translateY(${pull}px)`;
+                        aboutReveal.style.transition = 'transform 0.1s ease-out';
+                    }
+
+                    const triggeredBack = scrollAccum >= SNAP_THRESHOLD() || touchVelocity > FLING_VELOCITY;
+                    if (triggeredBack) {
+                        resetAccum();
+                        touchVelocity = 0;
+                        if (aboutReveal) aboutReveal.style.transform = ''; // snap rubber-band
                         transitionDir = -1;
                         // Pre-compute positions for reverse (needed if screen resized)
                         gridCards.forEach(c => { c.style.transform = ''; });
@@ -368,6 +394,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 });
                                 aboutReveal.classList.remove('about-visible');
                                 aboutReveal.style.opacity = '';
+                                aboutReveal.style.transform = '';
                                 mainGrid._cardPositions = null;
                                 if (textLogo) textLogo.classList.remove('logo-fixed-center');
                                 if (gridInfoHint) gridInfoHint.classList.add('hint-visible');
@@ -394,10 +421,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return false; // internal scroll
     }
 
-    // Touch state
+    // Touch state + velocity tracking
     let touchStartY = 0;
+    let lastTouchY = 0;
+    let lastTouchTime = 0;
+    let touchVelocity = 0; // px/ms — used to detect intentional flicks
+
     window.addEventListener('touchstart', (e) => {
         touchStartY = e.touches[0].clientY;
+        lastTouchY = touchStartY;
+        lastTouchTime = performance.now();
+        touchVelocity = 0;
     }, { passive: true });
 
     // Wheel / touchmove handlers — extracted as named fns so overlay can detach them
@@ -412,6 +446,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (detailOverlay && detailOverlay.classList.contains('is-active')) return;
         const touchY = e.touches[0].clientY;
         const delta = touchStartY - touchY;
+
+        // Track velocity: px/ms between this and last touchmove
+        const now = performance.now();
+        const elapsed = now - lastTouchTime;
+        if (elapsed > 0) {
+            // Smooth velocity with light dampening to avoid one-frame spikes
+            const rawVelocity = Math.abs(touchY - lastTouchY) / elapsed;
+            touchVelocity = touchVelocity * 0.5 + rawVelocity * 0.5;
+        }
+        lastTouchY = touchY;
+        lastTouchTime = now;
+
         // About page: allow internal scroll, only transition at top boundary
         if (phase === 3 && !aboutAtBoundary(delta)) {
             touchStartY = touchY;
