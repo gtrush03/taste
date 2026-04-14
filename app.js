@@ -87,6 +87,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
+
     function renderAboutTransition() {
         const vx = window.innerWidth / 2;
         const vy = window.innerHeight / 2;
@@ -103,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
             mainGrid._cardPositions = null;
         }
 
-        const cardP = Math.min(aboutProgress / 0.6, 1);
+        const cardP = easeOutQuart(Math.min(aboutProgress / 0.55, 1));
         
         if (aboutProgress > 0.01 && textLogo) {
             textLogo.classList.add('logo-fixed-center');
@@ -121,18 +123,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const pos = mainGrid._cardPositions ? mainGrid._cardPositions[i] : { cx: vx, cy: vy };
             const dx = (pos.cx - vx);
             const dy = (pos.cy - vy);
-            const flyX = dx * cardP * 1.5;
-            const flyY = dy * cardP * 1.0;
-            const cardScale = 1 + cardP * 2.5;
-            const cardOpacity = Math.max(0, 1 - cardP * 1.8);
+            const flyX = dx * cardP * 1.2;
+            const flyY = dy * cardP * 0.8;
+            const cardScale = 1 + cardP * 1.6;
+            const cardOpacity = Math.max(0, 1 - cardP * 1.5);
             
             c.style.transform = `translate(${flyX}px, ${flyY}px) scale(${cardScale})`;
             c.style.opacity = cardOpacity;
+            c.style.filter = `blur(${cardP * 6}px)`;
             c.style.pointerEvents = aboutProgress > 0.02 ? 'none' : 'auto';
         });
 
         if (aboutReveal) {
-            if (aboutProgress > 0.5) {
+            const aboutFade = Math.max(0, Math.min((aboutProgress - 0.25) / 0.5, 1));
+            aboutReveal.style.opacity = aboutFade;
+            if (aboutFade > 0) {
                 aboutReveal.classList.add('about-visible');
             } else {
                 aboutReveal.classList.remove('about-visible');
@@ -146,13 +151,13 @@ document.addEventListener('DOMContentLoaded', () => {
         function tick() {
             let current = getValue();
             const diff = target - current;
-            if (Math.abs(diff) < 0.005) {
+            if (Math.abs(diff) < 0.003) {
                 setValue(target);
                 renderFn();
                 if (onDone) onDone();
                 return;
             }
-            setValue(current + diff * 0.12);
+            setValue(current + diff * 0.07);
             renderFn();
             requestAnimationFrame(tick);
         }
@@ -273,13 +278,14 @@ document.addEventListener('DOMContentLoaded', () => {
                             0,
                             renderAboutTransition,
                             () => {
-                                // Reset card styles
                                 gridCards.forEach(c => {
                                     c.style.transform = '';
                                     c.style.opacity = '';
+                                    c.style.filter = '';
                                     c.style.pointerEvents = '';
                                 });
                                 aboutReveal.classList.remove('about-visible');
+                                aboutReveal.style.opacity = '';
                                 mainGrid._cardPositions = null;
                                 if (textLogo) textLogo.classList.remove('logo-fixed-center');
                                 hardLock(1, 1200);
@@ -332,7 +338,21 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('overlay-title').innerText = card.getAttribute('data-title');
         document.getElementById('overlay-meta').innerText = card.getAttribute('data-meta');
         document.getElementById('overlay-description').innerText = card.getAttribute('data-description');
-        document.getElementById('overlay-hero-img').src = card.getAttribute('data-hero');
+
+        const heroSrc = card.getAttribute('data-hero');
+        const heroImg = document.getElementById('overlay-hero-img');
+        const heroVid = document.getElementById('overlay-hero-video');
+        if (heroSrc.endsWith('.mp4')) {
+            heroImg.style.display = 'none';
+            heroVid.style.display = 'block';
+            heroVid.src = heroSrc;
+            heroVid.play();
+        } else {
+            heroVid.style.display = 'none';
+            heroVid.src = '';
+            heroImg.style.display = '';
+            heroImg.src = heroSrc;
+        }
 
         // Geometrical computations for Clip Path
         const rect = card.getBoundingClientRect();
@@ -385,11 +405,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             setTimeout(() => {
                 overlay.classList.remove('is-active');
-                overlay.style.clipPath = 'inset(0 0 100% 0)'; // Default off-screen state
+                overlay.style.clipPath = 'inset(0 0 100% 0)';
+                const vid = document.getElementById('overlay-hero-video');
+                if (vid) { vid.pause(); vid.src = ''; vid.style.display = 'none'; }
                 currentCardEl = null;
                 currentCardId = null;
                 isAnimating = false;
-            }, 600); // 0.6s bounds transition
+            }, 600);
         }, 100);
     }
 
