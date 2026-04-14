@@ -962,12 +962,12 @@ body {
         width: 100%;
     }
 
-    /* Reorder: contacts on top, logo spacer middle, about text bottom */
-    .about-col--right { order: -1; }
+    /* Reorder: about text on top, logo spacer middle, contacts bottom */
+    .about-col--left { order: -1; }
     .about-col--center { order: 0; }
-    .about-col--left { order: 1; }
+    .about-col--right { order: 1; }
 
-    /* Contacts: side-by-side at top */
+    /* Contacts: side-by-side below logo */
     .about-col--right {
         display: flex;
         flex-direction: row;
@@ -977,7 +977,7 @@ body {
         max-width: none;
         margin: 0;
         gap: clamp(10px, 3.8vw, 18px);
-        padding: clamp(16px, 7.6svh, 74px) 8px clamp(16px, 2.6svh, 26px);
+        padding: clamp(16px, 2.6svh, 26px) 8px clamp(16px, 2.6svh, 26px);
     }
 
     .contact-person {
@@ -1020,9 +1020,9 @@ body {
         margin: 0 0 clamp(8px, 1.6svh, 18px);
     }
 
-    /* About text: below logo spacer, flows naturally */
+    /* About text: above logo, flows naturally */
     .about-col--left {
-        padding: 0 8px;
+        padding: clamp(16px, 7.6svh, 74px) 8px clamp(12px, 2svh, 22px);
         max-width: none;
         margin: 0;
         align-items: center;
