@@ -353,8 +353,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Populate overlay data
         document.getElementById('overlay-title').innerText = card.getAttribute('data-title');
-        document.getElementById('overlay-meta').innerText = card.getAttribute('data-meta');
-        document.getElementById('overlay-description').innerText = card.getAttribute('data-description');
+        document.getElementById('overlay-subtitle').innerText = card.getAttribute('data-subtitle') || '';
+        document.getElementById('overlay-type').innerText = card.getAttribute('data-type') || '';
+        document.getElementById('overlay-credits').innerText = card.getAttribute('data-credits') || '';
 
         const heroSrc = card.getAttribute('data-hero');
         const heroImg = document.getElementById('overlay-hero-img');
