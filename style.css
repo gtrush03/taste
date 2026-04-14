@@ -903,7 +903,7 @@ body {
             "duribody  .         .           nabi"
             "ikea      ikea      uber-right  uber-right";
         gap: 8px;
-        padding: 40px 8px 40px;
+        padding: clamp(28px, 4svh, 38px) 8px clamp(36px, 5svh, 46px);
         height: 100vh;
         height: 100svh;
     }
