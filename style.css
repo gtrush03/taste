@@ -116,16 +116,17 @@ body {
     pointer-events: none;
 }
 
-#hero-bg-video {
+#hero-bg-video,
+#scroll-hero video[data-seamless-b] {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 1;
     z-index: 0;
     will-change: transform, opacity;
 }
+#hero-bg-video { opacity: 1; }
 
 /* PERSISTENT CENTER LOGO — always visible, color transitions */
 #persistent-logo {

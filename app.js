@@ -96,16 +96,14 @@ document.addEventListener('DOMContentLoaded', () => {
         tileControllers.forEach(c => c.play());
     }
 
-    // Hero bg video — seamless loop via ended + instant seek (cached = no gap)
-    // Double-buffering the hero would require wrapping the transform/opacity JS
-    // targets; ended+seek is simpler and imperceptible once the video is cached.
+    // Hero bg video — same double-buffered seamless loop as tiles.
+    // This also overrides iOS Low Power Mode autoplay block: the controller
+    // keeps calling .play() actively, primed by the global touchstart gesture,
+    // so the hero video plays even when Low Power is enabled.
     const heroBgEl = document.getElementById('hero-bg-video');
+    let heroBgController = null;
     if (heroBgEl) {
-        heroBgEl.removeAttribute('loop');
-        heroBgEl.addEventListener('ended', () => {
-            heroBgEl.currentTime = 0;
-            heroBgEl.play().catch(() => {});
-        });
+        heroBgController = createSeamlessLoop(heroBgEl);
     }
 
     // Color interpolation: cream (#f4e7d2) to red (#9b0001)
@@ -121,7 +119,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const videoScale = 1 + eased * 0.15;
         const heroOpacity = Math.max(0, 1 - eased * 1.1);
 
+        // Apply transform to BOTH hero A and its double-buffer B clone
+        // so whichever video is currently visible after the A/B swap scales correctly.
         heroBgVideo.style.transform = `scale(${videoScale})`;
+        const heroB = scrollHero.querySelector('video[data-seamless-b]');
+        if (heroB) heroB.style.transform = `scale(${videoScale})`;
         scrollHero.style.opacity = heroOpacity;
 
         // Smoothly transition logo color from cream to red
