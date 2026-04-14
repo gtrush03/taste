@@ -7,6 +7,11 @@
     <!-- Playfair Display kept as fallback if TT Ramillas trial not loaded -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://player.vimeo.com">
+    <link rel="preconnect" href="https://i.vimeocdn.com">
+    <link rel="preconnect" href="https://f.vimeocdn.com">
+    <link rel="preconnect" href="https://www.youtube.com">
+    <link rel="preconnect" href="https://i.ytimg.com">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -35,7 +40,7 @@
         <div class="center-content text-logo-spacer"></div>
 
         <!-- Cards -->
-        <div class="card card-uber-left" data-id="ikea" data-title="IKEA" data-subtitle="Buy Now. Build Later." data-type="Spec Commercial" data-credits="dir. Yelisey Kazakevich / dp. Andy Bae" data-hero="images/ikea_loop.mp4">
+        <div class="card card-uber-left" data-id="ikea" data-title="IKEA" data-subtitle="Buy Now. Build Later." data-type="Spec Commercial" data-credits="dir. Yelisey Kazakevich / dp. Andy Bae" data-hero="images/ikea_loop.mp4" data-embed="https://www.youtube.com/embed/uOTdu8ViNzQ" data-aspect="4/3">
             <div class="card-inner">
                 <div class="card-front top-gradient">
                     <video src="images/ikea_loop.mp4" autoplay muted loop playsinline class="tile-img"></video>
@@ -47,7 +52,7 @@
             </div>
         </div>
 
-        <div class="card card-duribody" data-id="duribody" data-title="Duribody" data-subtitle="Good Posture. Good Focus." data-type="Fashion Campaign" data-credits="dir. Jasmine Lee / dp. Andy Bae" data-hero="images/duribody_loop.mp4">
+        <div class="card card-duribody" data-id="duribody" data-title="Duribody" data-subtitle="Good Posture. Good Focus." data-type="Fashion Campaign" data-credits="dir. Jasmine Lee / dp. Andy Bae" data-hero="images/duribody_loop.mp4" data-embed="" data-stills="images/duribody_still_1.png,images/duribody_still_2.png">
             <div class="card-inner">
                 <div class="card-front bottom-gradient">
                     <video src="images/duribody_loop.mp4" autoplay muted loop playsinline class="tile-img"></video>
@@ -59,7 +64,7 @@
             </div>
         </div>
 
-        <div class="card card-life-of-dar" data-id="uber-running" data-title="Uber" data-subtitle="Costs Less Than Your Friendship" data-type="Spec Commercial" data-credits="dir. Yelisey Kazakevich / dp. Andy Bae" data-hero="images/uber_loop.mp4">
+        <div class="card card-life-of-dar" data-id="uber-running" data-title="Uber" data-subtitle="Costs Less Than Your Friendship" data-type="Spec Commercial" data-credits="dir. Yelisey Kazakevich / dp. Andy Bae" data-hero="images/uber_loop.mp4" data-embed="https://www.youtube.com/embed/EUIelyxl8no" data-aspect="4/3">
             <div class="card-inner">
                 <div class="card-front bottom-gradient">
                     <video src="images/uber_loop.mp4" autoplay muted loop playsinline class="tile-img"></video>
@@ -71,7 +76,7 @@
             </div>
         </div>
 
-        <div class="card card-uber-right" data-id="life-of-dar" data-title="Life of Dar" data-subtitle="Season 4" data-type="Podcast Promo" data-credits="dir. Darya Abtahi / dp. Andy Bae" data-hero="images/life_of_dar_loop.mp4">
+        <div class="card card-uber-right" data-id="life-of-dar" data-title="Life of Dar" data-subtitle="Season 4" data-type="Podcast Promo" data-credits="dir. Darya Abtahi / dp. Andy Bae" data-hero="images/life_of_dar_loop.mp4" data-embed="https://player.vimeo.com/video/1179946929" data-aspect="4/3" data-embed2="https://www.youtube.com/embed/FBHnXazoDwk" data-aspect2="4/3">
             <div class="card-inner">
                 <div class="card-front bottom-gradient">
                     <video src="images/life_of_dar_loop.mp4" autoplay muted loop playsinline class="tile-img"></video>
@@ -83,7 +88,7 @@
             </div>
         </div>
 
-        <div class="card card-ikea" data-id="heineken" data-title="Heineken 0.0" data-subtitle="For Mondays Like These" data-type="Spec Commercial" data-credits="dir. Yelisey Kazakevich / dp. Andy Bae" data-hero="images/heineken_loop.mp4">
+        <div class="card card-ikea" data-id="heineken" data-title="Heineken 0.0" data-subtitle="For Mondays Like These" data-type="Spec Commercial" data-credits="dir. Yelisey Kazakevich / dp. Andy Bae" data-hero="images/heineken_loop.mp4" data-embed="https://www.youtube.com/embed/TnDVvcDywNM">
             <div class="card-inner">
                 <div class="card-front bottom-gradient">
                     <video src="images/heineken_loop.mp4" autoplay muted loop playsinline class="tile-img"></video>
@@ -95,7 +100,7 @@
             </div>
         </div>
 
-        <div class="card card-nabi" data-id="nabi-cat-cafe" data-title="Nabi Cat Cafe" data-subtitle="Nabi" data-type="Brand Film" data-credits="dir./dp. Andy Bae" data-hero="images/nabi_loop.mp4">
+        <div class="card card-nabi" data-id="nabi-cat-cafe" data-title="Nabi Cat Cafe" data-subtitle="Nabi" data-type="Brand Film" data-credits="dir./dp. Andy Bae" data-hero="images/nabi_loop.mp4" data-embed="https://www.youtube.com/embed/XnI-ZL_GxBQ" data-aspect="4/3">
             <div class="card-inner">
                 <div class="card-front top-gradient">
                     <video src="images/nabi_loop.mp4" autoplay muted loop playsinline class="tile-img"></video>
@@ -166,10 +171,15 @@
         <!-- close button removed — taste. logo in top bar handles navigation -->
         <div class="overlay-scroll-container">
             <div class="overlay-content">
-                <div class="overlay-frame">
+                <div class="overlay-frame" id="overlay-frame-primary">
                     <img id="overlay-hero-img" src="" alt="Hero">
                     <video id="overlay-hero-video" src="" autoplay muted loop playsinline style="display:none;"></video>
+                    <iframe id="overlay-hero-embed" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="display:none;"></iframe>
                 </div>
+                <div class="overlay-frame overlay-frame-secondary" id="overlay-frame-secondary" style="display:none;">
+                    <iframe id="overlay-secondary-embed" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+                <div id="overlay-stills" style="display:none;"></div>
                 <div class="overlay-info">
                     <div class="overlay-info__left">
                         <h1 class="overlay-title" id="overlay-title">Project Title</h1>

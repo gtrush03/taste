@@ -345,6 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Wheel handler
     window.addEventListener('wheel', (e) => {
+        if (detailOverlay && detailOverlay.classList.contains('is-active')) return;
         e.preventDefault();
         handleScroll(e.deltaY);
     }, { passive: false });
@@ -357,6 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
 
     window.addEventListener('touchmove', (e) => {
+        if (detailOverlay && detailOverlay.classList.contains('is-active')) return;
         e.preventDefault();
         const touchY = e.touches[0].clientY;
         const delta = touchStartY - touchY;
@@ -386,16 +388,99 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('overlay-credits').innerText = card.getAttribute('data-credits') || '';
 
         const heroSrc = card.getAttribute('data-hero');
+        const embedSrc = card.getAttribute('data-embed');
+        const aspectRatio = card.getAttribute('data-aspect');
+        const embed2Src = card.getAttribute('data-embed2');
+        const aspect2 = card.getAttribute('data-aspect2');
         const heroImg = document.getElementById('overlay-hero-img');
         const heroVid = document.getElementById('overlay-hero-video');
-        if (heroSrc.endsWith('.mp4')) {
-            heroImg.style.display = 'none';
+        const heroEmbed = document.getElementById('overlay-hero-embed');
+        const primaryFrame = document.getElementById('overlay-frame-primary');
+        const secondaryFrame = document.getElementById('overlay-frame-secondary');
+        const secondaryEmbed = document.getElementById('overlay-secondary-embed');
+
+        heroImg.style.display = 'none';
+        heroVid.style.display = 'none';
+        heroVid.src = '';
+        heroEmbed.style.display = 'none';
+        heroEmbed.src = '';
+        secondaryFrame.style.display = 'none';
+        secondaryEmbed.src = '';
+        secondaryFrame.style.width = '';
+        secondaryFrame.style.height = '';
+        secondaryFrame.classList.remove('has-aspect');
+
+        primaryFrame.style.width = '';
+        primaryFrame.style.height = '';
+        primaryFrame.classList.remove('has-aspect');
+
+        function sizeFrame(frame, ar) {
+            const [aw, ah] = ar.split('/').map(Number);
+            const ratio = aw / ah;
+            const pad = 64;
+            const infoH = 120;
+            const availW = window.innerWidth - pad;
+            const availH = window.innerHeight - infoH;
+            let w = availW;
+            let h = w / ratio;
+            if (h > availH) {
+                h = availH;
+                w = h * ratio;
+            }
+            frame.style.width = Math.floor(w) + 'px';
+            frame.style.height = Math.floor(h) + 'px';
+            frame.classList.add('has-aspect');
+        }
+
+        if (aspectRatio) {
+            sizeFrame(primaryFrame, aspectRatio);
+        }
+
+        const hasSecondary = embed2Src && embed2Src.length > 0;
+        const stillsData = card.getAttribute('data-stills');
+        const stillsContainer = document.getElementById('overlay-stills');
+        stillsContainer.innerHTML = '';
+        stillsContainer.style.display = 'none';
+
+        const hasExtra = hasSecondary || (stillsData && stillsData.length > 0);
+
+        if (hasSecondary) {
+            if (aspect2) {
+                sizeFrame(secondaryFrame, aspect2);
+            }
+            secondaryFrame.style.display = '';
+            secondaryEmbed.src = embed2Src + (embed2Src.includes('youtube') ? '?rel=0&modestbranding=1&color=white' : '?color=ffffff&title=0&byline=0&portrait=0');
+        }
+
+        if (stillsData && stillsData.length > 0) {
+            const paths = stillsData.split(',');
+            paths.forEach(src => {
+                const img = document.createElement('img');
+                img.src = src.trim();
+                img.className = 'overlay-still-img';
+                stillsContainer.appendChild(img);
+            });
+            stillsContainer.style.display = '';
+        }
+
+        if (hasExtra) {
+            overlay.classList.add('multi-video');
+        } else {
+            overlay.classList.remove('multi-video');
+        }
+
+        if (embedSrc) {
+            heroEmbed.style.display = 'block';
+            heroEmbed.loading = 'eager';
+            const isVimeo = embedSrc.includes('vimeo');
+            heroEmbed.src = isVimeo
+                ? embedSrc + '?autoplay=1&background=1&dnt=1&color=ffffff&title=0&byline=0&portrait=0&quality=auto'
+                : embedSrc + '?autoplay=1&rel=0&modestbranding=1&color=white';
+        } else if (heroSrc.endsWith('.mp4')) {
             heroVid.style.display = 'block';
             heroVid.src = heroSrc;
             heroVid.play();
         } else {
-            heroVid.style.display = 'none';
-            heroVid.src = '';
             heroImg.style.display = '';
             heroImg.src = heroSrc;
         }
@@ -461,6 +546,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 overlay.style.clipPath = `inset(${cy}px ${window.innerWidth - cx}px ${window.innerHeight - cy}px ${cx}px round 0px)`;
                 const vid = document.getElementById('overlay-hero-video');
                 if (vid) { vid.pause(); vid.src = ''; vid.style.display = 'none'; }
+                const emb = document.getElementById('overlay-hero-embed');
+                if (emb) { emb.src = ''; emb.style.display = 'none'; }
+                const pFrm = document.getElementById('overlay-frame-primary');
+                if (pFrm) { pFrm.style.width = ''; pFrm.style.height = ''; pFrm.classList.remove('has-aspect'); }
+                const sFrm = document.getElementById('overlay-frame-secondary');
+                const sEmb = document.getElementById('overlay-secondary-embed');
+                if (sFrm) { sFrm.style.display = 'none'; sFrm.style.width = ''; sFrm.style.height = ''; sFrm.classList.remove('has-aspect'); }
+                if (sEmb) { sEmb.src = ''; }
+                const stills = document.getElementById('overlay-stills');
+                if (stills) { stills.innerHTML = ''; stills.style.display = 'none'; }
+                overlay.classList.remove('multi-video');
                 if (persistentLogo) persistentLogo.style.opacity = '1';
                 currentCardEl = null;
                 currentCardId = null;
@@ -471,16 +567,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     closeBtn.addEventListener('click', () => {
         if (isAnimating) return;
-        window.history.back(); // Invokes popstate automatically
+        if (overlay.classList.contains('is-active')) {
+            if (window.location.hash.startsWith('#project-')) {
+                window.history.replaceState(null, '', window.location.pathname);
+            }
+            closeOverlay();
+        }
     });
 
     // 4. HISTORY / POPSTATE ROUTING
     window.addEventListener('popstate', (e) => {
-        // If we are currently showing an overlay and hit back, close it
-        if (overlay.classList.contains('is-active')) {
+        if (overlay.classList.contains('is-active') && !window.location.hash.startsWith('#project-')) {
             closeOverlay();
         } else if (window.location.hash.startsWith('#project-')) {
-            // Edge case: User navigated forward manually or reloaded
             const pId = window.location.hash.replace('#project-', '');
             const card = document.querySelector(`.card[data-id="${pId}"]`);
             if (card) openOverlay(card, true);
@@ -490,7 +589,10 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && overlay.classList.contains('is-active')) {
             if (isAnimating) return;
-            window.history.back();
+            if (window.location.hash.startsWith('#project-')) {
+                window.history.replaceState(null, '', window.location.pathname);
+            }
+            closeOverlay();
         }
     });
 
