@@ -164,7 +164,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // B starts playing from 0 (served from cache — instant). At ~200ms from end,
     // they crossfade. No seek, no black frame. Returns { play, pause } controls.
     function createSeamlessLoop(videoEl) {
-        const src = videoEl.src;
+        // Resolve src from videoEl.src, currentSrc, or a child <source> tag
+        const src = videoEl.src || videoEl.currentSrc || videoEl.querySelector('source')?.src || '';
         if (!src) return { play: () => videoEl.play().catch(()=>{}), pause: () => videoEl.pause() };
 
         videoEl.removeAttribute('loop');
