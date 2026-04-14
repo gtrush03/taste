@@ -231,10 +231,43 @@ body {
 .center-content {
     display: flex;
     align-items: center;
+    justify-content: center;
 }
 
 .text-logo-spacer {
     grid-area: 2 / 2 / 3 / 4;
+    position: relative;
+}
+
+#grid-info-hint {
+    position: fixed;
+    top: calc(50% + clamp(25px, 4.6vh, 52px));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    color: rgba(155, 0, 1, 0.44);
+    font-family: 'Open Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    animation: info-bob 8s ease-in-out infinite;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+#grid-info-hint.hint-visible {
+    opacity: 1;
+}
+
+@keyframes info-bob {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(6px); }
 }
 
 
@@ -474,7 +507,7 @@ body {
 .overlay-logo-btn {
     position: absolute;
     left: 50%;
-    top: 0;
+    top: -8px;
     transform: translateX(-50%);
     background: none;
     border: none;
@@ -495,6 +528,17 @@ body {
 .overlay-logo-btn:hover {
     opacity: 0.6;
     transform: translateX(-50%) scale(0.96);
+}
+
+.overlay-home-label {
+    display: block;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    font-style: normal;
+    letter-spacing: 0.02em;
+    color: #9b0001;
+    margin-top: 2px;
 }
 
 .overlay-logo-btn .logo-dot {
@@ -569,6 +613,7 @@ body {
 
 #about-section.about-visible {
     pointer-events: auto;
+    z-index: 15;
 }
 
 /* Shared column base */
@@ -859,6 +904,11 @@ body {
         margin: 0;
         z-index: 20;
         pointer-events: none;
+    }
+
+    #grid-info-hint {
+        top: calc(50% + clamp(15px, 4vw, 28px));
+        font-size: 10px;
     }
 
     .overlay-title { font-size: 18px; }

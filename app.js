@@ -65,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const aboutReveal = document.getElementById('about-section');
     const gridCards = document.querySelectorAll('.card');
     const detailOverlay = document.getElementById('detail-overlay');
+    const gridInfoHint = document.getElementById('grid-info-hint');
     
     // Phase-based scroll with AUTO-SNAP:
     // Phase 0: Hero — user scrolls a bit, then it auto-completes
@@ -111,8 +112,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (heroProgress >= 0.99) {
             scrollHero.classList.add('hero-done');
+            if (gridInfoHint) gridInfoHint.classList.add('hint-visible');
         } else {
             scrollHero.classList.remove('hero-done');
+            if (gridInfoHint) gridInfoHint.classList.remove('hint-visible');
             if (heroProgress <= 0.6) {
                 mainGrid.classList.remove('grid-visible');
             }
@@ -141,6 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (aboutProgress > 0.01 && textLogo) {
             textLogo.classList.add('logo-fixed-center');
+            if (gridInfoHint) gridInfoHint.classList.remove('hint-visible');
         } else if (textLogo) {
             textLogo.classList.remove('logo-fixed-center');
         }
@@ -510,6 +514,7 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.style.clipPath = `inset(0px 0px 0px 0px round 0px)`;
         overlay.classList.add('is-active');
         if (persistentLogo) persistentLogo.style.opacity = '0';
+        if (gridInfoHint) gridInfoHint.classList.remove('hint-visible');
 
         // Release lock and trigger content fade-in
         setTimeout(() => {
