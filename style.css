@@ -1034,16 +1034,26 @@ body {
     }
 
     /* Overlay adjustments — three-column info bar like desktop */
-    .overlay-content { padding: 16px 12px 20px; justify-content: flex-start; }
+    .overlay-content {
+        padding: 16px 12px 20px;
+        justify-content: flex-start;
+        height: 100%;
+    }
+
     .overlay-frame {
         border-radius: 12px;
         flex: 0 0 auto;
-        margin-top: 20vh;
+        margin-top: auto !important;
+        margin-bottom: auto !important;
     }
 
-    /* Multi-video pages (Duribody, Life of Dar): no extra spacing */
+    /* Multi-video pages (Duribody, Life of Dar): stack from top, no centering */
+    #detail-overlay.multi-video .overlay-content {
+        height: auto;
+    }
     #detail-overlay.multi-video .overlay-frame {
-        margin-top: 0;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
     }
     .overlay-still-img { border-radius: 12px; }
 
@@ -1077,6 +1087,15 @@ body {
     .overlay-type { font-size: 9px; }
     .overlay-credits { font-size: 8px; }
     .overlay-home-label { font-size: 8px; }
+
+    /* Dark theme for video pages on mobile */
+    #detail-overlay { background-color: #000; }
+    .overlay-logo-btn { color: #f4e7d2 !important; }
+    .overlay-home-label { color: #f4e7d2 !important; }
+    .overlay-title { color: #fff !important; }
+    .overlay-subtitle { color: rgba(255, 255, 255, 0.6) !important; }
+    .overlay-type { color: #fff !important; }
+    .overlay-credits { color: rgba(255, 255, 255, 0.5) !important; }
 
     #overlay-stills { gap: 8px; margin-top: 12px; }
 }

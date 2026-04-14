@@ -486,7 +486,7 @@ document.addEventListener('DOMContentLoaded', () => {
             heroEmbed.loading = 'eager';
             const isVimeo = embedSrc.includes('vimeo');
             heroEmbed.src = isVimeo
-                ? embedSrc + '?autoplay=1&background=1&dnt=1&color=ffffff&title=0&byline=0&portrait=0&quality=auto'
+                ? embedSrc + '?autoplay=1&muted=1&title=0&byline=0&portrait=0'
                 : embedSrc + '?autoplay=1&rel=0&modestbranding=1&color=white';
         } else if (heroSrc.endsWith('.mp4')) {
             heroVid.style.display = 'block';
