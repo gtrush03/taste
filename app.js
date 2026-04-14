@@ -79,13 +79,28 @@ document.addEventListener('DOMContentLoaded', () => {
     let lockTimer = null;
     let currentSnapId = null;
 
-    // Tile videos — paused when hidden to save CPU/GPU
-    const tileVideos = Array.from(document.querySelectorAll('.card video'));
+    // Tile videos — seamless double-buffered loops, paused when hidden
+    // Exclude B-roll clones (data-seamless-b) from the query
+    const tileVideoEls = Array.from(document.querySelectorAll('.card video:not([data-seamless-b])'));
+    const tileControllers = tileVideoEls.map(v => createSeamlessLoop(v));
+
     function pauseTileVideos() {
-        tileVideos.forEach(v => { if (!v.paused) v.pause(); });
+        tileControllers.forEach(c => c.pause());
     }
     function resumeTileVideos() {
-        tileVideos.forEach(v => { if (v.paused) v.play().catch(() => {}); });
+        tileControllers.forEach(c => c.play());
+    }
+
+    // Hero bg video — seamless loop via ended + instant seek (cached = no gap)
+    // Double-buffering the hero would require wrapping the transform/opacity JS
+    // targets; ended+seek is simpler and imperceptible once the video is cached.
+    const heroBgEl = document.getElementById('hero-bg-video');
+    if (heroBgEl) {
+        heroBgEl.removeAttribute('loop');
+        heroBgEl.addEventListener('ended', () => {
+            heroBgEl.currentTime = 0;
+            heroBgEl.play().catch(() => {});
+        });
     }
 
     // Color interpolation: cream (#f4e7d2) to red (#9b0001)
@@ -138,6 +153,100 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function easeInQuad(t) { return t * t; }
     function easeInOutQuad(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+
+    // ─── Seamless video loop via double-buffering ────────────────────────────
+    // Creates a hidden B-roll clone of the video. When A is ~400ms from ending,
+    // B starts playing from 0 (served from cache — instant). At ~200ms from end,
+    // they crossfade. No seek, no black frame. Returns { play, pause } controls.
+    function createSeamlessLoop(videoEl) {
+        const src = videoEl.src;
+        if (!src) return { play: () => videoEl.play().catch(()=>{}), pause: () => videoEl.pause() };
+
+        videoEl.removeAttribute('loop');
+
+        // Clone B into the same parent (card-front), absolutely positioned on top
+        const b = document.createElement('video');
+        b.src = src;
+        b.muted = true;
+        b.setAttribute('playsinline', '');
+        b.preload = 'auto';
+        b.className = videoEl.className; // inherits tile-img styles
+        // Inherit computed object-position (handles CSS overrides like .card-uber-right .tile-img)
+        b.style.objectPosition = getComputedStyle(videoEl).objectPosition;
+        b.style.position = 'absolute';
+        b.style.inset = '0';
+        b.style.opacity = '0';
+        b.style.pointerEvents = 'none';
+        b.setAttribute('data-seamless-b', ''); // exclude from querySelectorAll scans
+        videoEl.parentNode.insertBefore(b, videoEl.nextSibling);
+
+        let A = videoEl; // currently playing
+        let B = b;       // standby ready to take over
+        let swapTimer = null;
+        let isPaused = true;
+
+        const FADE_MS   = 220; // crossfade duration
+        const BUFFER_MS = 200; // time to give B to buffer from cache before fade starts
+
+        function scheduleSwap() {
+            if (swapTimer) clearTimeout(swapTimer);
+            if (!A.duration || isPaused) return;
+
+            const triggerIn = Math.max(0, (A.duration - (FADE_MS + BUFFER_MS) / 1000) - A.currentTime) * 1000;
+
+            swapTimer = setTimeout(() => {
+                if (isPaused) return;
+
+                // Start B from 0 — will be instant from browser cache
+                B.currentTime = 0;
+                B.play().catch(() => {});
+
+                // After BUFFER_MS, begin crossfade
+                setTimeout(() => {
+                    if (isPaused) return;
+                    B.style.opacity = '1';
+                    A.style.opacity = '0';
+
+                    // After FADE_MS, complete the swap and reset A for next cycle
+                    setTimeout(() => {
+                        A.pause();
+                        A.currentTime = 0;
+                        A.style.opacity = '0';
+                        B.style.opacity = '1';
+                        [A, B] = [B, A]; // swap roles
+                        scheduleSwap();  // schedule next loop from B's current time
+                    }, FADE_MS);
+                }, BUFFER_MS);
+            }, triggerIn);
+        }
+
+        function startWhenReady() {
+            if (A.readyState >= 1 && A.duration) {
+                scheduleSwap();
+            } else {
+                A.addEventListener('loadedmetadata', scheduleSwap, { once: true });
+            }
+        }
+
+        return {
+            play() {
+                isPaused = false;
+                A.play().catch(() => {});
+                startWhenReady();
+            },
+            pause() {
+                isPaused = true;
+                if (swapTimer) clearTimeout(swapTimer);
+                A.pause();
+                B.pause();
+                // Reset B so next resume starts clean
+                B.currentTime = 0;
+                B.style.opacity = '0';
+                A.style.opacity = '1';
+            }
+        };
+    }
+    // ─────────────────────────────────────────────────────────────────────────
 
     function renderAboutTransition() {
         const vx = window.innerWidth / 2;
