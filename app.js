@@ -9,6 +9,23 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentCardId = null;
     let currentCardEl = null;
 
+    // Force autoplay on ALL videos (mobile + desktop)
+    function forceAutoplayAll() {
+        document.querySelectorAll('video').forEach(v => {
+            v.muted = true;
+            v.setAttribute('playsinline', '');
+            v.setAttribute('muted', '');
+            v.play().catch(() => {});
+        });
+    }
+    forceAutoplayAll();
+    document.addEventListener('touchstart', forceAutoplayAll, { once: true });
+    document.addEventListener('click', forceAutoplayAll, { once: true });
+    // Re-trigger on visibility change (tab switch, screen lock)
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) forceAutoplayAll();
+    });
+
     // Check if initial hash matches a project on load
     const initHash = window.location.hash;
     if (initHash && initHash.startsWith('#project-')) {
