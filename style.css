@@ -929,19 +929,22 @@ body {
         align-self: stretch;
     }
 
+    .card-duribody .tile-img {
+        object-position: center center;
+    }
+
     .card-overlay { padding: 14px; }
     .card-overlay h2 { font-size: 16px; }
     .card-overlay p { font-size: 10px; }
 
-    /* About: fixed, single-column, scrollable, natural flow */
+    /* About: fixed, single-column, locked view — same on every phone */
     #about-section {
         grid-template-columns: 1fr;
         grid-template-rows: auto auto auto;
         padding: 20px 20px 48px;
         gap: 0;
         align-items: center;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
+        overflow: hidden;
     }
 
     #about-section.about-visible { z-index: 15; }
@@ -960,7 +963,7 @@ body {
     .about-col--center { order: 0; }
     .about-col--left { order: 1; }
 
-    /* Contacts: side-by-side at top */
+    /* Contacts: side-by-side at top, nudged down slightly */
     .about-col--right {
         display: flex;
         flex-direction: row;
@@ -970,7 +973,7 @@ body {
         max-width: none;
         margin: 0;
         gap: 16px;
-        padding: 16px 8px 24px;
+        padding: 24px 8px 24px;
     }
 
     .contact-person {
@@ -995,14 +998,14 @@ body {
 
     .about-logo-spacer {
         display: block;
-        height: clamp(48px, 14vw, 90px);
-        margin: 16px 0 6px;
+        height: clamp(44px, 13vw, 80px);
+        margin: 12px 0 2px;
     }
 
     .about-city {
-        font-size: 10px !important;
-        letter-spacing: 0.04em;
-        margin-bottom: 20px;
+        font-size: clamp(7px, 2vw, 11px) !important;
+        letter-spacing: 0.06em;
+        margin-bottom: 16px;
     }
 
     /* About text: below logo spacer, flows naturally */
