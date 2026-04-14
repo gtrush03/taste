@@ -395,37 +395,7 @@ body {
     overflow: hidden;
 }
 
-.overlay-close-btn {
-    position: absolute;
-    top: 24px;
-    right: 24px;
-    z-index: 1001;
-    background: rgba(0, 0, 0, 0.06);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 50%;
-    width: 44px;
-    height: 44px;
-    color: #1a1a1a;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    opacity: 0;
-    transform: scale(0.8);
-    transition: opacity 0.3s ease, transform 0.3s ease, background 0.3s ease;
-}
-
-.overlay-close-btn:hover {
-    background: rgba(0, 0, 0, 0.12);
-}
-
-#detail-overlay.content-ready .overlay-close-btn {
-    opacity: 1;
-    transform: scale(1);
-    transition-delay: 0.2s;
-}
+/* Close button removed — taste. logo in overlay-info handles close */
 
 .overlay-content {
     display: flex;
@@ -462,10 +432,43 @@ body {
 .overlay-info {
     width: 100%;
     flex-shrink: 0;
-    padding: 20px 4px 0;
+    padding: 0 4px 20px;
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: flex-start;
+    order: -1;
+    position: relative;
+}
+
+.overlay-logo-btn {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    background: none;
+    border: none;
+    font-family: 'TT Ramillas', 'Playfair Display', serif;
+    font-size: 40px;
+    font-weight: 900;
+    font-style: italic;
+    color: #9b0001;
+    letter-spacing: -0.07em;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    user-select: none;
+    z-index: 2;
+}
+
+.overlay-logo-btn:hover {
+    opacity: 0.6;
+    transform: translateX(-50%) scale(0.96);
+}
+
+.overlay-logo-btn .logo-dot {
+    font-size: 0.75em;
+    vertical-align: baseline;
 }
 
 .overlay-info__left,
@@ -844,10 +847,10 @@ body {
     .card-overlay p { font-size: 13px; }
     
     
-    .overlay-close-btn { top: 16px; right: 16px; width: 40px; height: 40px; }
+    .overlay-logo-btn { font-size: 22px; }
     .overlay-content { padding: 16px 16px 20px; }
     .overlay-frame { border-radius: 12px; }
-    .overlay-info { padding: 14px 2px 0; }
+    .overlay-info { padding: 0 2px 14px; }
     .overlay-title { font-size: 16px; }
     .overlay-info { flex-direction: column; gap: 12px; align-items: flex-start; }
     .overlay-info__right { text-align: left; }

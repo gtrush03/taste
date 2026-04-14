@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const cards = document.querySelectorAll('.card');
     const overlay = document.getElementById('detail-overlay');
-    const closeBtn = document.getElementById('overlay-close');
+    const closeBtn = document.getElementById('overlay-logo-btn');
     const scrollContainer = overlay.querySelector('.overlay-scroll-container');
     const textLogo = document.querySelector('.text-logo');
     
