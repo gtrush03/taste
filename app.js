@@ -48,9 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 0. SCROLL SEQUENCE ENGINE (0 -> 1: Hero, 1 -> 2: About Us)
     const scrollHero = document.getElementById('scroll-hero');
-    const heroBox = document.getElementById('hero-media-box');
+    const heroBgVideo = document.getElementById('hero-bg-video');
     const heroHint = document.getElementById('hero-hint');
-    const heroInnerVideo = document.getElementById('hero-inner-video');
     const mainGrid = document.getElementById('main-grid');
     const aboutReveal = document.getElementById('about-section');
     const gridCards = document.querySelectorAll('.card');
@@ -64,30 +63,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let phase = 0;
     let heroProgress = 0;
     let aboutProgress = 0;
-    let locked = false;        // true = ignore ALL scroll input
+    let locked = false;
     let lockTimer = null;
-    const isMobile = window.innerWidth < 768;
-
-    const startW = isMobile ? 220 : 300;
-    const startH = isMobile ? 280 : 360;
-    const maxW = window.innerWidth;
-    const maxH = window.innerHeight;
 
     function renderHero() {
-        const w = startW + heroProgress * (maxW - startW);
-        const h = startH + heroProgress * (maxH - startH);
-        const r = 24 * (1 - heroProgress);
+        const videoScale = 1 + heroProgress * 0.15;
+        const heroOpacity = 1 - heroProgress;
 
-        heroBox.style.width = w + 'px';
-        heroBox.style.height = h + 'px';
-        heroBox.style.borderRadius = r + 'px';
-        heroBox.style.background = `transparent`;
-        heroBox.style.boxShadow = `none`;
-
-        const videoOpacity = Math.min(heroProgress * 1.2, 0.75);
-        const videoScale = 3 - heroProgress * 2;
-        heroInnerVideo.style.opacity = videoOpacity;
-        heroInnerVideo.style.transform = `scale(${videoScale})`;
+        heroBgVideo.style.transform = `scale(${videoScale})`;
+        scrollHero.style.opacity = heroOpacity;
 
         if (heroProgress > 0.05) {
             heroHint.classList.add('hidden');
