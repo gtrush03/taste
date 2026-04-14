@@ -189,25 +189,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Smooth spring-style animation with proper deceleration
+    // Smooth cinematic transition between pages
     function autoSnap(getValue, setValue, target, renderFn, onDone) {
         locked = true;
         const start = getValue();
         const distance = target - start;
-        const duration = 900;
+        const duration = 1100;
         let startTime = null;
 
-        function easeInOutCubic(t) {
+        function easeInOutQuart(t) {
             return t < 0.5
-                ? 4 * t * t * t
-                : 1 - Math.pow(-2 * t + 2, 3) / 2;
+                ? 8 * t * t * t * t
+                : 1 - Math.pow(-2 * t + 2, 4) / 2;
         }
 
         function tick(now) {
             if (!startTime) startTime = now;
             const elapsed = now - startTime;
             const t = Math.min(elapsed / duration, 1);
-            const eased = easeInOutCubic(t);
+            const eased = easeInOutQuart(t);
 
             setValue(start + distance * eased);
             renderFn();
@@ -259,20 +259,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         switch (phase) {
             case 0: { // Hero — scroll-driven but auto-snaps
-                const delta = Math.min(Math.abs(deltaY) * 0.002, 0.04);
+                const delta = Math.min(Math.abs(deltaY) * 0.0015, 0.03);
                 if (scrollingDown) {
                     heroProgress = Math.min(heroProgress + delta, 1);
                     renderHero();
-                    if (heroProgress >= 0.25 && heroProgress < 1) {
+                    if (heroProgress >= 0.18 && heroProgress < 1) {
                         autoSnap(
                             () => heroProgress,
                             (v) => { heroProgress = v; },
                             1,
                             renderHero,
-                            () => hardLock(1, 600)
-                        );
-                    } else if (heroProgress >= 1) {
-                        hardLock(1, 600);
+                            () => hardLock(1, 800)
+                    );
+                } else if (heroProgress >= 1) {
+                        hardLock(1, 800);
                     }
                 } else if (heroProgress > 0) {
                     heroProgress = Math.max(heroProgress - delta, 0);
@@ -298,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             (v) => { aboutProgress = v; },
                             1,
                             renderAboutTransition,
-                            () => hardLock(3, 600)
+                            () => hardLock(3, 800)
                         );
                     }
                 } else if (scrollingUp) {
@@ -313,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             (v) => { heroProgress = v; },
                             0,
                             renderHero,
-                            () => hardLock(0, 500)
+                            () => hardLock(0, 800)
                         );
                     }
                 }
@@ -345,7 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 aboutReveal.style.opacity = '';
                                 mainGrid._cardPositions = null;
                                 if (textLogo) textLogo.classList.remove('logo-fixed-center');
-                                hardLock(1, 600);
+                                hardLock(1, 800);
                             }
                         );
                     }
@@ -535,18 +535,23 @@ document.addEventListener('DOMContentLoaded', () => {
         // Force browser reflow to register the starting clip-path
         void overlay.offsetWidth;
 
-        // Animate up to full screen
-        overlay.style.transition = 'clip-path 0.6s cubic-bezier(0.8, 0, 0.1, 1)';
+        // Animate up to full screen — fast cinematic expansion
+        overlay.style.transition = 'clip-path 0.45s cubic-bezier(0.65, 0, 0.05, 1)';
         overlay.style.clipPath = `inset(0px 0px 0px 0px round 0px)`;
         overlay.classList.add('is-active');
-        if (persistentLogo) persistentLogo.style.opacity = '0';
+        if (persistentLogo) {
+            persistentLogo.style.transition = 'opacity 0.25s ease';
+            persistentLogo.style.opacity = '0';
+        }
         if (gridInfoHint) gridInfoHint.classList.remove('hint-visible');
 
-        // Release lock and trigger content fade-in
+        // Content fades in overlapping with expansion for seamless feel
         setTimeout(() => {
             overlay.classList.add('content-ready');
+        }, 250);
+        setTimeout(() => {
             isAnimating = false;
-        }, 600);
+        }, 450);
     }
 
     // 3. OVERLAY CLOSE LOGIC
@@ -564,7 +569,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Brief pause for content to start fading, then shrink clip-path back to card
         setTimeout(() => {
-            overlay.style.transition = 'clip-path 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+            overlay.style.transition = 'clip-path 0.42s cubic-bezier(0.32, 0, 0.07, 1)';
             overlay.style.clipPath = insetVal;
 
             setTimeout(() => {
@@ -588,12 +593,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const stills = document.getElementById('overlay-stills');
                 if (stills) { stills.innerHTML = ''; stills.style.display = 'none'; }
                 overlay.classList.remove('multi-video');
-                if (persistentLogo) persistentLogo.style.opacity = '1';
+                if (persistentLogo) {
+                    persistentLogo.style.transition = 'opacity 0.3s ease';
+                    persistentLogo.style.opacity = '1';
+                }
                 currentCardEl = null;
                 currentCardId = null;
                 isAnimating = false;
-            }, 520);
-        }, 80);
+            }, 400);
+        }, 60);
     }
 
     closeBtn.addEventListener('click', () => {
@@ -618,12 +626,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     window.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && overlay.classList.contains('is-active')) {
+        if ((e.key === 'Escape' || e.key === 'Backspace') && overlay.classList.contains('is-active')) {
             if (isAnimating) return;
-            if (window.location.hash.startsWith('#project-')) {
-                window.history.replaceState(null, '', window.location.pathname);
+            if (e.key === 'Backspace' && window.location.hash.startsWith('#project-')) {
+                e.preventDefault();
+                window.history.back();
+            } else {
+                if (window.location.hash.startsWith('#project-')) {
+                    window.history.replaceState(null, '', window.location.pathname);
+                }
+                closeOverlay();
             }
-            closeOverlay();
         }
     });
 
