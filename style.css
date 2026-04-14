@@ -933,12 +933,12 @@ body {
     .card-overlay h2 { font-size: 16px; }
     .card-overlay p { font-size: 10px; }
 
-    /* About: stays fixed, single-column, scrollable within page */
+    /* About: fixed, single-column, scrollable, natural flow */
     #about-section {
         grid-template-columns: 1fr;
         grid-template-rows: auto auto auto;
-        padding: 24px 20px 72px;
-        gap: 28px;
+        padding: 20px 20px 48px;
+        gap: 0;
         align-items: center;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
@@ -952,6 +952,7 @@ body {
         opacity: 1;
         transform: none !important;
         transition: none;
+        width: 100%;
     }
 
     /* Reorder: contacts on top, logo spacer middle, about text bottom */
@@ -959,7 +960,7 @@ body {
     .about-col--center { order: 0; }
     .about-col--left { order: 1; }
 
-    /* Contacts: side-by-side, compact, pushed lower */
+    /* Contacts: side-by-side at top */
     .about-col--right {
         display: flex;
         flex-direction: row;
@@ -969,7 +970,7 @@ body {
         max-width: none;
         margin: 0;
         gap: 16px;
-        padding-top: 11vh;
+        padding: 16px 8px 24px;
     }
 
     .contact-person {
@@ -978,53 +979,48 @@ body {
         align-items: center;
     }
 
-    .contact-name { font-size: 19px !important; letter-spacing: -0.02em; }
-    .contact-role { font-size: 13px !important; margin-bottom: 16px; }
+    .contact-name { font-size: 17px !important; letter-spacing: -0.02em; }
+    .contact-role { font-size: 11px !important; margin-bottom: 12px; }
     .contact-person span,
-    .contact-person a { font-size: 13px; }
+    .contact-person a { font-size: 11px; }
 
-    /* Center: NYC directly under the fixed-center logo — only visible on about page */
+    /* Center: logo spacer + NYC — flows naturally, reserves space for fixed logo */
     .about-col--center {
         padding: 0;
         align-items: center;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, 0) !important;
-        margin-top: clamp(16px, 4vw, 28px);
-        z-index: 100000;
-        pointer-events: none;
-        opacity: 0 !important;
-        transition: opacity 0.5s ease !important;
+        text-align: center;
+        position: relative;
+        transform: none !important;
     }
 
-    #about-section.about-visible .about-col--center {
-        opacity: 1 !important;
+    .about-logo-spacer {
+        display: block;
+        height: clamp(48px, 14vw, 90px);
+        margin: 16px 0 6px;
     }
-
-    .about-logo-spacer { display: none; }
 
     .about-city {
         font-size: 10px !important;
         letter-spacing: 0.04em;
+        margin-bottom: 20px;
     }
 
-    /* About text: below logo, centered + justified, balanced with contact spacing */
+    /* About text: below logo spacer, flows naturally */
     .about-col--left {
-        padding: 14vh 8px 0;
+        padding: 0 8px;
         max-width: none;
         margin: 0;
         align-items: center;
     }
 
     .about-text-block {
-        max-width: 70%;
-        width: 70%;
+        max-width: 78%;
+        width: 78%;
         margin: 0 auto;
     }
 
     .about-col__text {
-        font-size: 14px;
+        font-size: 13px;
         text-align: justify;
         text-align-last: center;
     }
