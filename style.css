@@ -940,11 +940,12 @@ body {
     .card-overlay h2 { font-size: 16px; }
     .card-overlay p { font-size: 10px; }
 
-    /* About: fixed, single-column, locked view — same on every phone */
+    /* About: fixed, single-column, locked view — scales across all phones
+       Tested range: 390×844 (iPhone 14) → 440×956 (iPhone 17 Pro Max) */
     #about-section {
         grid-template-columns: 1fr;
         grid-template-rows: auto auto auto;
-        padding: 20px 20px 48px;
+        padding: clamp(14px, 2.2svh, 22px) 20px clamp(28px, 5svh, 48px);
         gap: 0;
         align-items: center;
         overflow: hidden;
@@ -966,7 +967,7 @@ body {
     .about-col--center { order: 0; }
     .about-col--left { order: 1; }
 
-    /* Contacts: side-by-side at top, nudged down slightly */
+    /* Contacts: side-by-side at top */
     .about-col--right {
         display: flex;
         flex-direction: row;
@@ -975,8 +976,8 @@ body {
         text-align: center;
         max-width: none;
         margin: 0;
-        gap: 16px;
-        padding: 24px 8px 24px;
+        gap: clamp(10px, 3.8vw, 18px);
+        padding: clamp(16px, 2.6svh, 26px) 8px clamp(16px, 2.6svh, 26px);
     }
 
     .contact-person {
@@ -985,10 +986,10 @@ body {
         align-items: center;
     }
 
-    .contact-name { font-size: 17px !important; letter-spacing: -0.02em; }
-    .contact-role { font-size: 11px !important; margin-bottom: 12px; }
+    .contact-name { font-size: clamp(14px, 3.9vw, 17px) !important; letter-spacing: -0.02em; }
+    .contact-role { font-size: clamp(9px, 2.5vw, 11px) !important; margin-bottom: clamp(8px, 1.4svh, 13px); }
     .contact-person span,
-    .contact-person a { font-size: 11px; }
+    .contact-person a { font-size: clamp(9px, 2.5vw, 11px); }
 
     /* Center: logo spacer + NYC — flows naturally, reserves space for fixed logo */
     .about-col--center {
@@ -1001,14 +1002,14 @@ body {
 
     .about-logo-spacer {
         display: block;
-        height: clamp(44px, 13vw, 80px);
-        margin: 12px 0 2px;
+        height: clamp(36px, 10vw, 80px);
+        margin: clamp(6px, 1.2svh, 14px) 0 clamp(1px, 0.3svh, 3px);
     }
 
     .about-city {
-        font-size: clamp(7px, 2vw, 11px) !important;
+        font-size: clamp(6px, 1.8vw, 11px) !important;
         letter-spacing: 0.06em;
-        margin-bottom: 16px;
+        margin-bottom: clamp(8px, 1.6svh, 18px);
     }
 
     /* About text: below logo spacer, flows naturally */
@@ -1020,15 +1021,16 @@ body {
     }
 
     .about-text-block {
-        max-width: 78%;
-        width: 78%;
+        max-width: clamp(72%, 78vw, 82%);
+        width: clamp(72%, 78vw, 82%);
         margin: 0 auto;
     }
 
     .about-col__text {
-        font-size: 13px;
+        font-size: clamp(11px, 1.4svh, 13px);
         text-align: justify;
         text-align-last: center;
+        line-height: 1.55;
     }
 
     .about-col__text--lead,
