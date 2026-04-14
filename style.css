@@ -871,15 +871,19 @@ body {
         overflow: hidden;
     }
 
-    /* Logo: centered between top & bottom card rows */
-    #persistent-logo {
+    /* Logo: dead center on all mobile pages, never moves */
+    #persistent-logo,
+    #persistent-logo.logo-fixed-center,
+    #persistent-logo.logo-revealed,
+    #persistent-logo.logo-revealed.logo-fixed-center {
         font-size: clamp(44px, 13vw, 80px);
-        margin-top: -8px;
-    }
-
-    /* Logo shifts up on about/contact page */
-    #persistent-logo.logo-fixed-center {
-        top: 40%;
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        margin: 0 !important;
+        margin-top: 0 !important;
+        clip-path: none !important;
     }
 
     #grid-info-hint {
@@ -929,14 +933,15 @@ body {
     .card-overlay h2 { font-size: 16px; }
     .card-overlay p { font-size: 10px; }
 
-    /* About: stays fixed, single-column, no internal scroll */
+    /* About: stays fixed, single-column, scrollable within page */
     #about-section {
         grid-template-columns: 1fr;
         grid-template-rows: auto auto auto;
         padding: 24px 20px 72px;
         gap: 28px;
         align-items: center;
-        overflow: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     #about-section.about-visible { z-index: 15; }
@@ -978,15 +983,15 @@ body {
     .contact-person span,
     .contact-person a { font-size: 13px; }
 
-    /* Center: logo spacer + NYC directly under logo — only visible on about page */
+    /* Center: NYC directly under the fixed-center logo — only visible on about page */
     .about-col--center {
         padding: 0;
         align-items: center;
         position: fixed;
-        top: 40%;
+        top: 50%;
         left: 50%;
         transform: translate(-50%, 0) !important;
-        margin-top: clamp(18px, 5vw, 32px);
+        margin-top: clamp(16px, 4vw, 28px);
         z-index: 100000;
         pointer-events: none;
         opacity: 0 !important;
@@ -1004,9 +1009,9 @@ body {
         letter-spacing: 0.04em;
     }
 
-    /* About text: below logo, centered + justified, pushed lower */
+    /* About text: below logo, centered + justified, balanced with contact spacing */
     .about-col--left {
-        padding: 25vh 8px 0;
+        padding: 14vh 8px 0;
         max-width: none;
         margin: 0;
         align-items: center;

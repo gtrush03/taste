@@ -355,9 +355,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // About section internal scroll helper
+    function aboutAtBoundary(deltaY) {
+        if (phase !== 3 || !aboutReveal) return true;
+        if (aboutReveal.scrollHeight <= aboutReveal.clientHeight + 4) return true;
+        const atTop = aboutReveal.scrollTop <= 0;
+        const atBottom = aboutReveal.scrollTop + aboutReveal.clientHeight >= aboutReveal.scrollHeight - 2;
+        if (deltaY < 0 && atTop) return true;   // scrolling up at top → page transition
+        if (deltaY > 0 && atBottom) return false; // scrolling down at bottom → no more pages
+        return false; // internal scroll
+    }
+
     // Wheel handler — works at all viewport widths
     window.addEventListener('wheel', (e) => {
         if (detailOverlay && detailOverlay.classList.contains('is-active')) return;
+        // About page: allow internal scroll, only transition at top boundary
+        if (phase === 3 && !aboutAtBoundary(e.deltaY)) return;
         e.preventDefault();
         handleScroll(e.deltaY);
     }, { passive: false });
@@ -373,6 +386,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (detailOverlay && detailOverlay.classList.contains('is-active')) return;
         const touchY = e.touches[0].clientY;
         const delta = touchStartY - touchY;
+        // About page: allow internal scroll, only transition at top boundary
+        if (phase === 3 && !aboutAtBoundary(delta)) {
+            touchStartY = touchY;
+            return;
+        }
         e.preventDefault();
         touchStartY = touchY;
         handleScroll(delta * 2);
