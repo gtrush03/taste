@@ -60,7 +60,7 @@
 
 a, button, [role="button"], input[type="submit"], select,
 .nav-link, .detail-close {
-    cursor: url('images/cursor-red-pointer.svg') 9 0, pointer !important;
+    cursor: url('images/cursor-red.svg') 2 1, pointer !important;
 }
 
 img, video, .tile__face--image, #scroll-hero, .detail-hero, .overlay-frame {
@@ -73,7 +73,7 @@ img a, video a, .tile a, .tile button,
 #scroll-hero a, #scroll-hero button,
 .detail-hero a, .detail-hero button,
 .tile__face--image a, .tile__face--image button {
-    cursor: url('images/cursor-cream-pointer.svg') 9 0, pointer !important;
+    cursor: url('images/cursor-cream.svg') 2 1, pointer !important;
 }
 
 #cursor-dot,
@@ -106,7 +106,7 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    transition: opacity 0.5s ease;
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 #scroll-hero.hero-done {
@@ -125,9 +125,13 @@ body {
     will-change: transform, opacity;
 }
 
-#hero-logo {
-    position: relative;
-    z-index: 2;
+/* PERSISTENT CENTER LOGO — always visible, color transitions */
+#persistent-logo {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100000;
     font-family: 'TT Ramillas', 'Playfair Display', serif;
     font-size: clamp(80px, 15vh, 160px);
     font-weight: 900;
@@ -135,24 +139,24 @@ body {
     color: #f4e7d2;
     letter-spacing: -0.07em;
     user-select: none;
+    pointer-events: none;
     white-space: nowrap;
     line-height: 1;
+    margin-top: -15px;
     opacity: 0;
-    transform: translateY(8px);
+    will-change: color;
 }
 
-#hero-logo.logo-revealed {
+#persistent-logo.logo-revealed {
     opacity: 1;
-    transform: translateY(0);
-    transition: opacity 0.95s cubic-bezier(0.33, 1, 0.68, 1),
-                transform 0.95s cubic-bezier(0.33, 1, 0.68, 1);
+    transition: opacity 0.4s ease;
 }
 
 .logo-dot {
     vertical-align: baseline;
 }
 
-#hero-logo .logo-dot {
+#persistent-logo .logo-dot {
     font-size: 0.75em;
     display: inline-block;
     opacity: 0;
@@ -160,7 +164,7 @@ body {
     filter: blur(2px);
 }
 
-#hero-logo.logo-revealed .logo-dot {
+#persistent-logo.logo-revealed .logo-dot {
     opacity: 1;
     transform: scale(1);
     filter: blur(0px);
@@ -217,7 +221,7 @@ body {
     z-index: 10;
     overflow: visible;
     opacity: 0;
-    transition: opacity 0.6s ease;
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .grid-container.grid-visible {
@@ -229,24 +233,8 @@ body {
     align-items: center;
 }
 
-.text-logo {
+.text-logo-spacer {
     grid-area: 2 / 2 / 3 / 4;
-    justify-content: center;
-    font-family: 'TT Ramillas', 'Playfair Display', serif;
-    font-size: clamp(80px, 15vh, 160px);
-    font-weight: 900;
-    font-style: italic;
-    color: #9b0001;
-    letter-spacing: -0.07em;
-    pointer-events: none;
-    z-index: 10;
-    margin-top: -15px;
-    white-space: nowrap;
-    line-height: 1;
-}
-
-.text-logo .logo-dot {
-    display: inline-block;
 }
 
 
@@ -254,7 +242,7 @@ body {
     position: relative;
     border-radius: 36px;
     background-color: transparent;
-    cursor: pointer;
+    cursor: url('images/cursor-cream.svg') 2 1, pointer;
     -webkit-tap-highlight-color: transparent;
 }
 
@@ -454,7 +442,7 @@ body {
     color: #9b0001;
     letter-spacing: -0.07em;
     line-height: 1;
-    cursor: pointer;
+    cursor: url('images/cursor-red.svg') 2 1, pointer;
     padding: 0;
     transition: opacity 0.3s ease, transform 0.3s ease;
     user-select: none;
@@ -555,13 +543,13 @@ body {
 #about-section.about-visible .about-col--left {
     opacity: 1;
     transform: translateY(0);
-    transition-delay: 0.15s;
+    transition-delay: 0.1s;
 }
 
 #about-section.about-visible .about-col--center {
     opacity: 1;
     transform: translateY(0);
-    transition-delay: 0.3s;
+    transition-delay: 0.25s;
 }
 
 #about-section.about-visible .about-col--right {
@@ -776,13 +764,9 @@ body {
     transition: opacity 0.3s ease;
 }
 
-/* Logo stays fixed center during zoom */
-.text-logo.logo-fixed-center {
-    position: fixed !important;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) !important;
-    z-index: 15;
+/* Logo z-index bump during about transition */
+#persistent-logo.logo-fixed-center {
+    z-index: 100001;
     margin: 0;
     clip-path: inset(0 0% 0 0) !important;
     opacity: 1 !important;
@@ -826,12 +810,8 @@ body {
         align-self: stretch;
     }
 
-    .text-logo {
+    .text-logo-spacer {
         grid-area: auto;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
         font-size: clamp(50px, 15vw, 90px);
         margin: 0;
         z-index: 20;
@@ -855,8 +835,8 @@ body {
     .overlay-info { flex-direction: column; gap: 12px; align-items: flex-start; }
     .overlay-info__right { text-align: left; }
 
-    /* Hero mobile alignment */
-    #hero-logo {
+    /* Persistent logo mobile */
+    #persistent-logo {
         font-size: clamp(50px, 15vw, 90px);
     }
 

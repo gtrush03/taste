@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const overlay = document.getElementById('detail-overlay');
     const closeBtn = document.getElementById('overlay-logo-btn');
     const scrollContainer = overlay.querySelector('.overlay-scroll-container');
-    const textLogo = document.querySelector('.text-logo');
+    const textLogo = document.getElementById('persistent-logo');
     
     let isAnimating = false;
     let currentCardId = null;
@@ -26,6 +26,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!document.hidden) forceAutoplayAll();
     });
 
+    // Seamless hero video loop — rewind just before end to avoid stutter
+    const heroBgVid = document.getElementById('hero-bg-video');
+    if (heroBgVid) {
+        heroBgVid.addEventListener('timeupdate', () => {
+            if (heroBgVid.duration && heroBgVid.currentTime > heroBgVid.duration - 0.3) {
+                heroBgVid.currentTime = 0;
+                heroBgVid.play().catch(() => {});
+            }
+        });
+    }
+
     // Check if initial hash matches a project on load
     const initHash = window.location.hash;
     if (initHash && initHash.startsWith('#project-')) {
@@ -36,10 +47,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // HERO LOGO ENTRANCE ANIMATION
-    const heroLogo = document.getElementById('hero-logo');
+    // PERSISTENT LOGO ENTRANCE ANIMATION
+    const persistentLogo = document.getElementById('persistent-logo');
     setTimeout(() => {
-        if (heroLogo) heroLogo.classList.add('logo-revealed');
+        if (persistentLogo) persistentLogo.classList.add('logo-revealed');
     }, 150);
     setTimeout(() => {
         const hint = document.getElementById('hero-hint');
@@ -66,12 +77,26 @@ document.addEventListener('DOMContentLoaded', () => {
     let locked = false;
     let lockTimer = null;
 
+    // Color interpolation: cream (#f4e7d2) to red (#9b0001)
+    function lerpColor(t) {
+        const r = Math.round(244 + t * (155 - 244));
+        const g = Math.round(231 + t * (0 - 231));
+        const b = Math.round(210 + t * (1 - 210));
+        return `rgb(${r},${g},${b})`;
+    }
+
     function renderHero() {
-        const videoScale = 1 + heroProgress * 0.15;
-        const heroOpacity = 1 - heroProgress;
+        const eased = easeOutQuart(heroProgress);
+        const videoScale = 1 + eased * 0.15;
+        const heroOpacity = Math.max(0, 1 - eased * 1.1);
 
         heroBgVideo.style.transform = `scale(${videoScale})`;
         scrollHero.style.opacity = heroOpacity;
+
+        // Smoothly transition logo color from cream to red
+        if (persistentLogo) {
+            persistentLogo.style.color = lerpColor(heroProgress);
+        }
 
         if (heroProgress > 0.05) {
             heroHint.classList.add('hidden');
@@ -79,12 +104,18 @@ document.addEventListener('DOMContentLoaded', () => {
             heroHint.classList.remove('hidden');
         }
 
+        // Start showing grid early for a crossfade feel
+        if (heroProgress > 0.6) {
+            mainGrid.classList.add('grid-visible');
+        }
+
         if (heroProgress >= 0.99) {
             scrollHero.classList.add('hero-done');
-            mainGrid.classList.add('grid-visible');
         } else {
             scrollHero.classList.remove('hero-done');
-            mainGrid.classList.remove('grid-visible');
+            if (heroProgress <= 0.6) {
+                mainGrid.classList.remove('grid-visible');
+            }
         }
     }
 
@@ -146,21 +177,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Auto-animate a value from current to target over ~600ms
+    // Smooth spring-style animation with proper deceleration
     function autoSnap(getValue, setValue, target, renderFn, onDone) {
         locked = true;
-        function tick() {
-            let current = getValue();
-            const diff = target - current;
-            if (Math.abs(diff) < 0.003) {
+        const start = getValue();
+        const distance = target - start;
+        const duration = 900;
+        let startTime = null;
+
+        function easeInOutCubic(t) {
+            return t < 0.5
+                ? 4 * t * t * t
+                : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        }
+
+        function tick(now) {
+            if (!startTime) startTime = now;
+            const elapsed = now - startTime;
+            const t = Math.min(elapsed / duration, 1);
+            const eased = easeInOutCubic(t);
+
+            setValue(start + distance * eased);
+            renderFn();
+
+            if (t < 1) {
+                requestAnimationFrame(tick);
+            } else {
                 setValue(target);
                 renderFn();
                 if (onDone) onDone();
-                return;
             }
-            setValue(current + diff * 0.07);
-            renderFn();
-            requestAnimationFrame(tick);
         }
         requestAnimationFrame(tick);
     }
@@ -182,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Accumulator for scroll intent detection
     let scrollAccum = 0;
     let scrollAccumTimer = null;
-    const SNAP_THRESHOLD = 80; // pixels of scroll needed to trigger transition
+    const SNAP_THRESHOLD = 60;
 
     function resetAccum() {
         scrollAccum = 0;
@@ -201,21 +247,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         switch (phase) {
             case 0: { // Hero — scroll-driven but auto-snaps
-                const delta = Math.min(Math.abs(deltaY) * 0.0015, 0.03);
+                const delta = Math.min(Math.abs(deltaY) * 0.002, 0.04);
                 if (scrollingDown) {
                     heroProgress = Math.min(heroProgress + delta, 1);
                     renderHero();
-                    // Once past 30%, auto-snap to completion
-                    if (heroProgress >= 0.3 && heroProgress < 1) {
+                    if (heroProgress >= 0.25 && heroProgress < 1) {
                         autoSnap(
                             () => heroProgress,
                             (v) => { heroProgress = v; },
                             1,
                             renderHero,
-                            () => hardLock(1, 1200) // HARD LOCK on grid for 1.2 seconds
+                            () => hardLock(1, 600)
                         );
                     } else if (heroProgress >= 1) {
-                        hardLock(1, 1200);
+                        hardLock(1, 600);
                     }
                 } else if (heroProgress > 0) {
                     heroProgress = Math.max(heroProgress - delta, 0);
@@ -241,7 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             (v) => { aboutProgress = v; },
                             1,
                             renderAboutTransition,
-                            () => hardLock(3, 1200)
+                            () => hardLock(3, 600)
                         );
                     }
                 } else if (scrollingUp) {
@@ -251,13 +296,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     if (scrollAccum >= SNAP_THRESHOLD) {
                         resetAccum();
-                        // Go back to hero
                         autoSnap(
                             () => heroProgress,
                             (v) => { heroProgress = v; },
                             0,
                             renderHero,
-                            () => hardLock(0, 800)
+                            () => hardLock(0, 500)
                         );
                     }
                 }
@@ -289,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 aboutReveal.style.opacity = '';
                                 mainGrid._cardPositions = null;
                                 if (textLogo) textLogo.classList.remove('logo-fixed-center');
-                                hardLock(1, 1200);
+                                hardLock(1, 600);
                             }
                         );
                     }
@@ -380,6 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.style.transition = 'clip-path 0.6s cubic-bezier(0.8, 0, 0.1, 1)';
         overlay.style.clipPath = `inset(0px 0px 0px 0px round 0px)`;
         overlay.classList.add('is-active');
+        if (persistentLogo) persistentLogo.style.opacity = '0';
 
         // Release lock and trigger content fade-in
         setTimeout(() => {
@@ -396,25 +441,32 @@ document.addEventListener('DOMContentLoaded', () => {
         // Start content fade-out
         overlay.classList.remove('content-ready');
 
-        // Wait a tiny bit for the text fade to begin before slicing the clip-path
-        setTimeout(() => {
-            // Stale rect fix: recalcute bounding box of the original tile (in case window resized)
-            const rect = currentCardEl.getBoundingClientRect();
-            const br = 36;
-            const insetVal = `inset(${rect.top}px ${window.innerWidth - rect.right}px ${window.innerHeight - rect.bottom}px ${rect.left}px round ${br}px)`;
+        // Recalculate bounding box of the original tile
+        const rect = currentCardEl.getBoundingClientRect();
+        const br = 36;
+        const insetVal = `inset(${rect.top}px ${window.innerWidth - rect.right}px ${window.innerHeight - rect.bottom}px ${rect.left}px round ${br}px)`;
 
+        // Brief pause for content to start fading, then shrink clip-path back to card
+        setTimeout(() => {
+            overlay.style.transition = 'clip-path 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
             overlay.style.clipPath = insetVal;
 
             setTimeout(() => {
                 overlay.classList.remove('is-active');
-                overlay.style.clipPath = 'inset(0 0 100% 0)';
+                overlay.style.transition = 'none';
+                // Collapse to a zero-size point at the card center so nothing is covered
+                const finalRect = currentCardEl ? currentCardEl.getBoundingClientRect() : rect;
+                const cx = finalRect.left + finalRect.width / 2;
+                const cy = finalRect.top + finalRect.height / 2;
+                overlay.style.clipPath = `inset(${cy}px ${window.innerWidth - cx}px ${window.innerHeight - cy}px ${cx}px round 0px)`;
                 const vid = document.getElementById('overlay-hero-video');
                 if (vid) { vid.pause(); vid.src = ''; vid.style.display = 'none'; }
+                if (persistentLogo) persistentLogo.style.opacity = '1';
                 currentCardEl = null;
                 currentCardId = null;
                 isAnimating = false;
-            }, 600);
-        }, 100);
+            }, 520);
+        }, 80);
     }
 
     closeBtn.addEventListener('click', () => {

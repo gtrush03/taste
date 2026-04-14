@@ -15,12 +15,14 @@
     <div id="cursor-dot"></div>
     <div id="cursor-ring"></div>
 
+    <!-- PERSISTENT CENTER LOGO -->
+    <div id="persistent-logo">taste<span class="logo-dot">.</span></div>
+
     <!-- SCROLL EXPANSION INTRO -->
     <section id="scroll-hero">
         <video id="hero-bg-video" autoplay muted loop playsinline>
             <source src="images/hero_bg.mp4" type="video/mp4">
         </video>
-        <div id="hero-logo">taste<span class="logo-dot">.</span></div>
         <div id="hero-hint">
             <span>scroll to taste</span>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -29,35 +31,35 @@
 
     <!-- MAIN PORTFOLIO (hidden until expanded) -->
     <div class="grid-container" id="main-grid">
-        <!-- Center row: logo (provides spacing between card rows) -->
-        <div class="center-content text-logo">taste<span class="logo-dot">.</span></div>
+        <!-- Center row: spacing between card rows (logo is now persistent outside grid) -->
+        <div class="center-content text-logo-spacer"></div>
 
         <!-- Cards -->
-        <div class="card card-uber-left" data-id="ikea" data-title="IKEA" data-subtitle="Commercial" data-type="Brand Film" data-credits="dir. Yelisey Kazakevich / dp. Andy Bae" data-hero="images/ikea_loop.mp4">
+        <div class="card card-uber-left" data-id="ikea" data-title="IKEA" data-subtitle="Buy Now. Build Later." data-type="Spec Commercial" data-credits="dir. Yelisey Kazakevich / dp. Andy Bae" data-hero="images/ikea_loop.mp4">
             <div class="card-inner">
                 <div class="card-front top-gradient">
                     <video src="images/ikea_loop.mp4" autoplay muted loop playsinline class="tile-img"></video>
                     <div class="card-overlay top-right">
                         <h2>IKEA</h2>
-                        <p>Costs Less Than Your<br>Friendship</p>
+                        <p>Buy Now. Build Later.</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="card card-duribody" data-id="duribody" data-title="Duribody" data-subtitle="Commercial" data-type="Brand Film" data-credits="dir. Yelisey Kazakevich / dp. Andy Bae" data-hero="images/duribody_loop.mp4">
+        <div class="card card-duribody" data-id="duribody" data-title="Duribody" data-subtitle="Good Posture. Good Focus." data-type="Fashion Campaign" data-credits="dir. Jasmine Lee / dp. Andy Bae" data-hero="images/duribody_loop.mp4">
             <div class="card-inner">
                 <div class="card-front bottom-gradient">
                     <video src="images/duribody_loop.mp4" autoplay muted loop playsinline class="tile-img"></video>
                     <div class="card-overlay bottom-left">
                         <h2>Duribody</h2>
-                        <p>blashlkaslkdasd</p>
+                        <p>Good Posture. Good Focus.</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="card card-life-of-dar" data-id="uber-running" data-title="Uber" data-subtitle="Commercial" data-type="Brand Film" data-credits="dir. Yelisey Kazakevich / dp. Andy Bae" data-hero="images/uber_loop.mp4">
+        <div class="card card-life-of-dar" data-id="uber-running" data-title="Uber" data-subtitle="Costs Less Than Your Friendship" data-type="Spec Commercial" data-credits="dir. Yelisey Kazakevich / dp. Andy Bae" data-hero="images/uber_loop.mp4">
             <div class="card-inner">
                 <div class="card-front bottom-gradient">
                     <video src="images/uber_loop.mp4" autoplay muted loop playsinline class="tile-img"></video>
@@ -69,37 +71,37 @@
             </div>
         </div>
 
-        <div class="card card-uber-right" data-id="life-of-dar" data-title="Life of Dar" data-subtitle="Season 4" data-type="Podcast Promo" data-credits="dir. Yelisey Kazakevich / dp. Andy Bae" data-hero="images/life_of_dar_loop.mp4">
+        <div class="card card-uber-right" data-id="life-of-dar" data-title="Life of Dar" data-subtitle="Season 4" data-type="Podcast Promo" data-credits="dir. Darya Abtahi / dp. Andy Bae" data-hero="images/life_of_dar_loop.mp4">
             <div class="card-inner">
                 <div class="card-front bottom-gradient">
                     <video src="images/life_of_dar_loop.mp4" autoplay muted loop playsinline class="tile-img"></video>
                     <div class="card-overlay bottom-right">
                         <h2>Life of Dar</h2>
-                        <p>Costs Less Than Your<br>Friendship</p>
+                        <p>Season 4 Trailer</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="card card-ikea" data-id="heineken" data-title="Heineken" data-subtitle="Commercial" data-type="Brand Film" data-credits="dir. Yelisey Kazakevich / dp. Andy Bae" data-hero="images/heineken_loop.mp4">
+        <div class="card card-ikea" data-id="heineken" data-title="Heineken 0.0" data-subtitle="For Mondays Like These" data-type="Spec Commercial" data-credits="dir. Yelisey Kazakevich / dp. Andy Bae" data-hero="images/heineken_loop.mp4">
             <div class="card-inner">
                 <div class="card-front bottom-gradient">
                     <video src="images/heineken_loop.mp4" autoplay muted loop playsinline class="tile-img"></video>
                     <div class="card-overlay bottom-left">
-                        <h2>Heineken</h2>
-                        <p>Costs Less Than Your Friendship</p>
+                        <h2>Heineken 0.0</h2>
+                        <p>For Mondays Like These</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="card card-nabi" data-id="nabi-cat-cafe" data-title="Nabi Cat Cafe" data-subtitle="Commercial" data-type="Brand Film" data-credits="dir. Yelisey Kazakevich / dp. Andy Bae" data-hero="images/nabi_loop.mp4">
+        <div class="card card-nabi" data-id="nabi-cat-cafe" data-title="Nabi Cat Cafe" data-subtitle="Nabi" data-type="Brand Film" data-credits="dir./dp. Andy Bae" data-hero="images/nabi_loop.mp4">
             <div class="card-inner">
                 <div class="card-front top-gradient">
                     <video src="images/nabi_loop.mp4" autoplay muted loop playsinline class="tile-img"></video>
                     <div class="card-overlay top-left">
                         <h2>Nabi Cat Cafe</h2>
-                        <p>Costs Less Than Your<br>Friendship</p>
+                        <p>Nabi</p>
                     </div>
                 </div>
             </div>
@@ -114,7 +116,7 @@
             <div class="about-text-block">
                 <p class="about-col__text about-col__text--lead">
                     <strong>Yelisey Kazakevich</strong> and <strong>Andy Bae</strong>
-                    are a <strong>Director/DP</strong> collective,
+                    are a <strong>Director/DP</strong> duo,
                     specializing in commercial production and branded content.
                 </p>
                 <p class="about-col__text about-col__text--body">
