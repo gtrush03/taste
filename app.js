@@ -9,33 +9,24 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentCardId = null;
     let currentCardEl = null;
 
-    // Force autoplay on ALL videos (mobile + desktop)
-    function forceAutoplayAll() {
-        document.querySelectorAll('video').forEach(v => {
-            v.muted = true;
-            v.setAttribute('playsinline', '');
-            v.setAttribute('muted', '');
-            v.play().catch(() => {});
-        });
+    // Force autoplay on hero video only on first interaction
+    // Tile videos are managed by pause/resume lifecycle — not force-played globally
+    function forceHeroAutoplay() {
+        const heroBg = document.getElementById('hero-bg-video');
+        if (heroBg) { heroBg.muted = true; heroBg.setAttribute('playsinline', ''); heroBg.play().catch(() => {}); }
     }
-    forceAutoplayAll();
-    document.addEventListener('touchstart', forceAutoplayAll, { once: true });
-    document.addEventListener('click', forceAutoplayAll, { once: true });
-    // Re-trigger on visibility change (tab switch, screen lock)
+    forceHeroAutoplay();
+    document.addEventListener('touchstart', forceHeroAutoplay, { once: true });
+    document.addEventListener('click', forceHeroAutoplay, { once: true });
+    // Re-trigger on visibility change — only resume videos that should be playing
     document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) forceAutoplayAll();
+        if (!document.hidden) {
+            const heroBg = document.getElementById('hero-bg-video');
+            if (heroBg && heroBg.paused) heroBg.play().catch(() => {});
+            // Only resume tile videos if the grid is actually visible
+            if (phase === 1 && heroProgress >= 0.99) resumeTileVideos();
+        }
     });
-
-    // Seamless hero video loop — rewind just before end to avoid stutter
-    const heroBgVid = document.getElementById('hero-bg-video');
-    if (heroBgVid) {
-        heroBgVid.addEventListener('timeupdate', () => {
-            if (heroBgVid.duration && heroBgVid.currentTime > heroBgVid.duration - 0.3) {
-                heroBgVid.currentTime = 0;
-                heroBgVid.play().catch(() => {});
-            }
-        });
-    }
 
     // Check if initial hash matches a project on load
     const initHash = window.location.hash;
@@ -83,8 +74,19 @@ document.addEventListener('DOMContentLoaded', () => {
     let phase = 0;
     let heroProgress = 0;
     let aboutProgress = 0;
+    let transitionDir = 1; // 1 = forward (grid→about), -1 = reverse (about→grid)
     let locked = false;
     let lockTimer = null;
+    let currentSnapId = null;
+
+    // Tile videos — paused when hidden to save CPU/GPU
+    const tileVideos = Array.from(document.querySelectorAll('.card video'));
+    function pauseTileVideos() {
+        tileVideos.forEach(v => { if (!v.paused) v.pause(); });
+    }
+    function resumeTileVideos() {
+        tileVideos.forEach(v => { if (v.paused) v.play().catch(() => {}); });
+    }
 
     // Color interpolation: cream (#f4e7d2) to red (#9b0001)
     function lerpColor(t) {
@@ -121,35 +123,43 @@ document.addEventListener('DOMContentLoaded', () => {
         if (heroProgress >= 0.99) {
             scrollHero.classList.add('hero-done');
             if (gridInfoHint) gridInfoHint.classList.add('hint-visible');
+            resumeTileVideos(); // hero done, grid is live
         } else {
             scrollHero.classList.remove('hero-done');
             if (gridInfoHint) gridInfoHint.classList.remove('hint-visible');
             if (heroProgress <= 0.6) {
                 mainGrid.classList.remove('grid-visible');
+                pauseTileVideos(); // hidden behind hero — save decode cost
             }
         }
     }
 
     function easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
 
+    function easeInQuad(t) { return t * t; }
+    function easeInOutQuad(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+
     function renderAboutTransition() {
         const vx = window.innerWidth / 2;
         const vy = window.innerHeight / 2;
 
-        if (aboutProgress > 0 && !mainGrid._cardPositions) {
-            gridCards.forEach(c => { c.style.transform = ''; });
-            void mainGrid.offsetWidth;
-            mainGrid._cardPositions = Array.from(gridCards).map(c => {
-                const rect = c.getBoundingClientRect();
-                return { cx: rect.left + rect.width / 2, cy: rect.top + rect.height / 2 };
-            });
-        }
         if (aboutProgress <= 0) {
             mainGrid._cardPositions = null;
         }
 
-        const cardP = easeOutQuart(Math.min(aboutProgress / 0.55, 1));
-        
+        // Forward: cards explode out fast with easeOutQuart
+        // Reverse: cards return smoothly with easeInQuad (slow start, settle naturally)
+        const cardP = transitionDir > 0
+            ? easeOutQuart(Math.min(aboutProgress / 0.55, 1))
+            : easeInQuad(aboutProgress);
+
+        // About section opacity
+        // Forward: fades in after cards are mostly gone (0.25–0.75 range)
+        // Reverse: fades out quickly in the first half so cards land cleanly
+        const aboutFade = transitionDir > 0
+            ? Math.max(0, Math.min((aboutProgress - 0.25) / 0.5, 1))
+            : Math.min(aboutProgress * 2, 1);
+
         if (aboutProgress > 0.01 && textLogo) {
             textLogo.classList.add('logo-fixed-center');
             if (gridInfoHint) gridInfoHint.classList.remove('hint-visible');
@@ -171,15 +181,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const flyY = dy * cardP * 0.8;
             const cardScale = 1 + cardP * 1.6;
             const cardOpacity = Math.max(0, 1 - cardP * 1.5);
-            
+
             c.style.transform = `translate(${flyX}px, ${flyY}px) scale(${cardScale})`;
             c.style.opacity = cardOpacity;
-            c.style.filter = `blur(${cardP * 6}px)`;
             c.style.pointerEvents = aboutProgress > 0.02 ? 'none' : 'auto';
         });
 
         if (aboutReveal) {
-            const aboutFade = Math.max(0, Math.min((aboutProgress - 0.25) / 0.5, 1));
             aboutReveal.style.opacity = aboutFade;
             if (aboutFade > 0) {
                 aboutReveal.classList.add('about-visible');
@@ -190,37 +198,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Smooth cinematic transition between pages
-    function autoSnap(getValue, setValue, target, renderFn, onDone) {
+    // speed: 0.12 = default (forward), 0.08 = slower/smoother (reverse)
+    function autoSnap(getValue, setValue, target, renderFn, onDone, speed = 0.12) {
         locked = true;
-        const start = getValue();
-        const distance = target - start;
-        const duration = 1100;
-        let startTime = null;
-
-        function easeInOutQuart(t) {
-            return t < 0.5
-                ? 8 * t * t * t * t
-                : 1 - Math.pow(-2 * t + 2, 4) / 2;
+        if (currentSnapId) {
+            cancelAnimationFrame(currentSnapId);
+            currentSnapId = null;
         }
-
-        function tick(now) {
-            if (!startTime) startTime = now;
-            const elapsed = now - startTime;
-            const t = Math.min(elapsed / duration, 1);
-            const eased = easeInOutQuart(t);
-
-            setValue(start + distance * eased);
-            renderFn();
-
-            if (t < 1) {
-                requestAnimationFrame(tick);
-            } else {
+        let cancelled = false;
+        function tick() {
+            if (cancelled) return;
+            let current = getValue();
+            const diff = target - current;
+            if (Math.abs(diff) < 0.004) {
                 setValue(target);
                 renderFn();
+                currentSnapId = null;
                 if (onDone) onDone();
+                return;
             }
+            setValue(current + diff * speed);
+            renderFn();
+            currentSnapId = requestAnimationFrame(tick);
         }
-        requestAnimationFrame(tick);
+        currentSnapId = requestAnimationFrame(tick);
+        return () => { cancelled = true; };
     }
 
     // Lock scroll completely for a duration, then unlock into a phase
@@ -291,14 +293,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     if (scrollAccum >= SNAP_THRESHOLD) {
                         resetAccum();
-                        // Start about transition — auto-snap the whole thing
+                        transitionDir = 1;
                         aboutProgress = 0;
+                        // Pre-compute card positions before entering RAF loop
+                        gridCards.forEach(c => { c.style.transform = ''; });
+                        void mainGrid.offsetWidth;
+                        mainGrid._cardPositions = Array.from(gridCards).map(c => {
+                            const rect = c.getBoundingClientRect();
+                            return { cx: rect.left + rect.width / 2, cy: rect.top + rect.height / 2 };
+                        });
+                        mainGrid.classList.add('grid-zooming');
+                        pauseTileVideos(); // tiles animating off — no need to decode
                         autoSnap(
                             () => aboutProgress,
                             (v) => { aboutProgress = v; },
                             1,
                             renderAboutTransition,
-                            () => hardLock(3, 800)
+                            () => {
+                                mainGrid.classList.remove('grid-zooming');
+                                hardLock(3, 800);
+                            }
                         );
                     }
                 } else if (scrollingUp) {
@@ -308,6 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     if (scrollAccum >= SNAP_THRESHOLD) {
                         resetAccum();
+                        pauseTileVideos(); // returning to hero — grid going off screen
                         autoSnap(
                             () => heroProgress,
                             (v) => { heroProgress = v; },
@@ -328,13 +343,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     if (scrollAccum >= SNAP_THRESHOLD) {
                         resetAccum();
-                        // Reverse about transition
+                        transitionDir = -1;
+                        // Pre-compute positions for reverse (needed if screen resized)
+                        gridCards.forEach(c => { c.style.transform = ''; });
+                        void mainGrid.offsetWidth;
+                        mainGrid._cardPositions = Array.from(gridCards).map(c => {
+                            const rect = c.getBoundingClientRect();
+                            return { cx: rect.left + rect.width / 2, cy: rect.top + rect.height / 2 };
+                        });
+                        mainGrid.classList.add('grid-zooming');
+                        // Slower lerp (0.08) = silky reverse pull, not a snap-back
                         autoSnap(
                             () => aboutProgress,
                             (v) => { aboutProgress = v; },
                             0,
                             renderAboutTransition,
                             () => {
+                                mainGrid.classList.remove('grid-zooming');
                                 gridCards.forEach(c => {
                                     c.style.transform = '';
                                     c.style.opacity = '';
@@ -345,8 +370,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                 aboutReveal.style.opacity = '';
                                 mainGrid._cardPositions = null;
                                 if (textLogo) textLogo.classList.remove('logo-fixed-center');
+                                if (gridInfoHint) gridInfoHint.classList.add('hint-visible');
+                                resumeTileVideos(); // cards are back — resume their videos
                                 hardLock(1, 800);
-                            }
+                            },
+                            0.08 // gentler speed for reverse
                         );
                     }
                 }
@@ -366,23 +394,21 @@ document.addEventListener('DOMContentLoaded', () => {
         return false; // internal scroll
     }
 
-    // Wheel handler — works at all viewport widths
-    window.addEventListener('wheel', (e) => {
+    // Touch state
+    let touchStartY = 0;
+    window.addEventListener('touchstart', (e) => {
+        touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    // Wheel / touchmove handlers — extracted as named fns so overlay can detach them
+    function onWheel(e) {
         if (detailOverlay && detailOverlay.classList.contains('is-active')) return;
         // About page: allow internal scroll, only transition at top boundary
         if (phase === 3 && !aboutAtBoundary(e.deltaY)) return;
         e.preventDefault();
         handleScroll(e.deltaY);
-    }, { passive: false });
-
-    // Touch handlers — work at all viewport widths
-    let touchStartY = 0;
-    window.addEventListener('touchstart', (e) => {
-        if (locked) return;
-        touchStartY = e.touches[0].clientY;
-    }, { passive: true });
-
-    window.addEventListener('touchmove', (e) => {
+    }
+    function onTouchMove(e) {
         if (detailOverlay && detailOverlay.classList.contains('is-active')) return;
         const touchY = e.touches[0].clientY;
         const delta = touchStartY - touchY;
@@ -393,8 +419,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         e.preventDefault();
         touchStartY = touchY;
-        handleScroll(delta * 2);
-    }, { passive: false });
+        const normalizedDelta = delta * (window.innerHeight / 844);
+        handleScroll(normalizedDelta);
+    }
+    function addScrollListeners() {
+        window.addEventListener('wheel', onWheel, { passive: false });
+        window.addEventListener('touchmove', onTouchMove, { passive: false });
+    }
+    function removeScrollListeners() {
+        window.removeEventListener('wheel', onWheel);
+        window.removeEventListener('touchmove', onTouchMove);
+    }
+    addScrollListeners();
 
     // 1. TILE CLICK TO DETAIL OVERLAY
     cards.forEach(card => {
@@ -518,7 +554,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (loaderPrimary) loaderPrimary.classList.add('loaded');
             heroVid.style.display = 'block';
             heroVid.src = heroSrc;
-            heroVid.play();
+            heroVid.play().catch(() => {});
         } else {
             if (loaderPrimary) loaderPrimary.classList.add('loaded');
             heroImg.style.display = '';
@@ -534,9 +570,11 @@ document.addEventListener('DOMContentLoaded', () => {
         scrollContainer.scrollTop = 0;
 
         // Apply initial locked state
+        overlay.style.willChange = 'clip-path';
         overlay.style.transition = 'none';
         overlay.style.clipPath = insetVal;
-        
+        overlay.style.webkitClipPath = insetVal;
+
         // Push State
         if (!skipHistoryPush) {
             window.history.pushState({ id: currentCardId }, '', `#project-${currentCardId}`);
@@ -546,9 +584,12 @@ document.addEventListener('DOMContentLoaded', () => {
         void overlay.offsetWidth;
 
         // Animate up to full screen — fast cinematic expansion
-        overlay.style.transition = 'clip-path 0.45s cubic-bezier(0.65, 0, 0.05, 1)';
+        overlay.style.transition = 'clip-path 0.45s cubic-bezier(0.65, 0, 0.05, 1), -webkit-clip-path 0.45s cubic-bezier(0.65, 0, 0.05, 1)';
         overlay.style.clipPath = `inset(0px 0px 0px 0px round 0px)`;
+        overlay.style.webkitClipPath = `inset(0px 0px 0px 0px round 0px)`;
         overlay.classList.add('is-active');
+        removeScrollListeners();
+        pauseTileVideos(); // overlay covers grid — free up decode budget
         if (persistentLogo) {
             persistentLogo.style.transition = 'opacity 0.25s ease';
             persistentLogo.style.opacity = '0';
@@ -561,6 +602,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 250);
         setTimeout(() => {
             isAnimating = false;
+            overlay.style.willChange = 'auto';
         }, 450);
     }
 
@@ -571,6 +613,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Start content fade-out
         overlay.classList.remove('content-ready');
+        overlay.style.willChange = 'clip-path';
 
         // Recalculate bounding box of the original tile
         const rect = currentCardEl.getBoundingClientRect();
@@ -579,8 +622,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Brief pause for content to start fading, then shrink clip-path back to card
         setTimeout(() => {
-            overlay.style.transition = 'clip-path 0.42s cubic-bezier(0.32, 0, 0.07, 1)';
+            overlay.style.transition = 'clip-path 0.42s cubic-bezier(0.32, 0, 0.07, 1), -webkit-clip-path 0.42s cubic-bezier(0.32, 0, 0.07, 1)';
             overlay.style.clipPath = insetVal;
+            overlay.style.webkitClipPath = insetVal;
 
             setTimeout(() => {
                 overlay.classList.remove('is-active');
@@ -589,7 +633,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const finalRect = currentCardEl ? currentCardEl.getBoundingClientRect() : rect;
                 const cx = finalRect.left + finalRect.width / 2;
                 const cy = finalRect.top + finalRect.height / 2;
-                overlay.style.clipPath = `inset(${cy}px ${window.innerWidth - cx}px ${window.innerHeight - cy}px ${cx}px round 0px)`;
+                const collapsed = `inset(${cy}px ${window.innerWidth - cx}px ${window.innerHeight - cy}px ${cx}px round 0px)`;
+                overlay.style.clipPath = collapsed;
+                overlay.style.webkitClipPath = collapsed;
                 const vid = document.getElementById('overlay-hero-video');
                 if (vid) { vid.pause(); vid.src = ''; vid.style.display = 'none'; }
                 const emb = document.getElementById('overlay-hero-embed');
@@ -610,6 +656,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentCardEl = null;
                 currentCardId = null;
                 isAnimating = false;
+                overlay.style.willChange = 'auto';
+                resumeTileVideos(); // grid is back in view
+                addScrollListeners();
             }, 400);
         }, 60);
     }

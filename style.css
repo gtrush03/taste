@@ -3,8 +3,7 @@
 ========================= */
 @font-face {
     font-family: 'Open Sauce One';
-    src: url('fonts/OpenSauceOne-Light.woff2') format('woff2'),
-         url('fonts/OpenSauceOne-Light.ttf') format('truetype');
+    src: url('fonts/OpenSauceOne-Light.woff2') format('woff2');
     font-weight: 300;
     font-style: normal;
     font-display: swap;
@@ -12,8 +11,7 @@
 
 @font-face {
     font-family: 'Open Sauce One';
-    src: url('fonts/OpenSauceOne-Regular.woff2') format('woff2'),
-         url('fonts/OpenSauceOne-Regular.ttf') format('truetype');
+    src: url('fonts/OpenSauceOne-Regular.woff2') format('woff2');
     font-weight: 400;
     font-style: normal;
     font-display: swap;
@@ -21,8 +19,7 @@
 
 @font-face {
     font-family: 'Open Sauce One';
-    src: url('fonts/OpenSauceOne-Medium.woff2') format('woff2'),
-         url('fonts/OpenSauceOne-Medium.ttf') format('truetype');
+    src: url('fonts/OpenSauceOne-Medium.woff2') format('woff2');
     font-weight: 500;
     font-style: normal;
     font-display: swap;
@@ -30,8 +27,7 @@
 
 @font-face {
     font-family: 'Open Sauce One';
-    src: url('fonts/OpenSauceOne-Bold.woff2') format('woff2'),
-         url('fonts/OpenSauceOne-Bold.ttf') format('truetype');
+    src: url('fonts/OpenSauceOne-Bold.woff2') format('woff2');
     font-weight: 700;
     font-style: normal;
     font-display: swap;
@@ -42,7 +38,7 @@
     src: url('fonts/TT-Ramillas-Bold-Italic.ttf') format('truetype');
     font-weight: 700;
     font-style: italic;
-    font-display: swap;
+    font-display: block;
 }
 
 @font-face {
@@ -50,30 +46,35 @@
     src: url('fonts/TT-Ramillas-Bold.ttf') format('truetype');
     font-weight: 700;
     font-style: normal;
-    font-display: swap;
+    font-display: block;
 }
 
 *, *::before, *::after {
     box-sizing: border-box;
-    cursor: url('images/cursor-red.svg') 2 1, auto;
 }
 
-a, button, [role="button"], input[type="submit"], select,
-.nav-link, .detail-close {
-    cursor: url('images/cursor-red.svg') 2 1, pointer !important;
-}
+@media (pointer: fine) {
+    *, *::before, *::after {
+        cursor: url('images/cursor-red.svg') 2 1, auto;
+    }
 
-img, video, iframe, .tile__face--image, #scroll-hero, .detail-hero, .overlay-frame {
-    cursor: url('images/cursor-cream.svg') 2 1, auto !important;
-}
+    a, button, [role="button"], input[type="submit"], select,
+    .nav-link, .detail-close {
+        cursor: url('images/cursor-red.svg') 2 1, pointer !important;
+    }
 
-.tile, .card,
-img a, video a, .tile a, .tile button,
-.card a, .card button, .overlay-frame a, .overlay-frame button,
-#scroll-hero a, #scroll-hero button,
-.detail-hero a, .detail-hero button,
-.tile__face--image a, .tile__face--image button {
-    cursor: url('images/cursor-cream.svg') 2 1, pointer !important;
+    img, video, iframe, .tile__face--image, #scroll-hero, .detail-hero, .overlay-frame {
+        cursor: url('images/cursor-cream.svg') 2 1, auto !important;
+    }
+
+    .tile, .card,
+    img a, video a, .tile a, .tile button,
+    .card a, .card button, .overlay-frame a, .overlay-frame button,
+    #scroll-hero a, #scroll-hero button,
+    .detail-hero a, .detail-hero button,
+    .tile__face--image a, .tile__face--image button {
+        cursor: url('images/cursor-cream.svg') 2 1, pointer !important;
+    }
 }
 
 #cursor-dot,
@@ -90,6 +91,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    min-height: 100dvh;
     color: #1a1a1a;
     overflow: hidden;
 }
@@ -144,7 +146,6 @@ body {
     line-height: 1;
     margin-top: -15px;
     opacity: 0;
-    will-change: color;
 }
 
 #persistent-logo.logo-revealed {
@@ -187,11 +188,13 @@ body {
     letter-spacing: 0.15em;
     opacity: 0;
     transition: opacity 0.55s cubic-bezier(0.33, 1, 0.68, 1);
+    animation: hint-bob 2s ease-in-out infinite;
+    animation-play-state: paused;
 }
 
 #hero-hint.hint-visible {
     opacity: 1;
-    animation: hint-bob 2s ease-in-out infinite;
+    animation-play-state: running;
 }
 
 #hero-hint.hidden {
@@ -215,6 +218,7 @@ body {
     max-width: none;
     width: 100%;
     height: 100vh;
+    height: 100dvh;
     max-height: none;
     margin: 0;
     position: relative;
@@ -256,6 +260,7 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.15em;
     animation: info-bob 8s ease-in-out infinite;
+    animation-play-state: paused;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.4s ease;
@@ -263,6 +268,7 @@ body {
 
 #grid-info-hint.hint-visible {
     opacity: 1;
+    animation-play-state: running;
 }
 
 @keyframes info-bob {
@@ -275,8 +281,13 @@ body {
     position: relative;
     border-radius: 36px;
     background-color: transparent;
-    cursor: url('images/cursor-cream.svg') 2 1, pointer;
     -webkit-tap-highlight-color: transparent;
+}
+
+@media (pointer: fine) {
+    .card {
+        cursor: url('images/cursor-cream.svg') 2 1, pointer;
+    }
 }
 
 .card-inner {
@@ -308,7 +319,6 @@ body {
     display: block;
     filter: brightness(0.85);
     transition: transform 1.2s cubic-bezier(0.19, 1, 0.22, 1), filter 1.2s cubic-bezier(0.19, 1, 0.22, 1);
-    will-change: transform, filter;
 }
 
 .card:hover .tile-img {
@@ -416,7 +426,6 @@ body {
 
 #detail-overlay.multi-video .overlay-scroll-container {
     overflow-y: scroll;
-    -webkit-overflow-scrolling: touch;
 }
 
 /* Close button removed — taste. logo in overlay-info handles close */
@@ -429,6 +438,7 @@ body {
     height: 100%;
     width: 100%;
     padding: 28px 32px 28px;
+    padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
     opacity: 0;
     transform: translateY(12px) scale(0.98);
     transition: opacity 0.25s ease-out,
@@ -639,6 +649,7 @@ body {
     pointer-events: none;
     overflow: hidden;
     padding: 0 60px;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
     gap: 0;
     user-select: text;
 }
@@ -934,7 +945,7 @@ body {
         gap: 8px;
         padding: clamp(28px, 4svh, 38px) 8px clamp(36px, 5svh, 46px);
         height: 100vh;
-        height: 100svh;
+        height: 100dvh;
     }
 
     .text-logo-spacer { display: none; }
@@ -1019,6 +1030,12 @@ body {
     .contact-role { font-size: clamp(9px, 2.5vw, 11px) !important; margin-bottom: clamp(8px, 1.4svh, 13px); }
     .contact-person span,
     .contact-person a { font-size: clamp(9px, 2.5vw, 11px); }
+
+    .contact-person a {
+        padding: 10px 4px;
+        margin: -10px -4px;
+        display: inline-block;
+    }
 
     /* Center: NYC above logo spacer on mobile */
     .about-col--center {
