@@ -66,7 +66,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const gridCards = document.querySelectorAll('.card');
     const detailOverlay = document.getElementById('detail-overlay');
     const gridInfoHint = document.getElementById('grid-info-hint');
-    
+    const mobileQuery = window.matchMedia('(max-width: 900px)');
+    let isMobile = mobileQuery.matches;
+    function isMobileNow() { return window.innerWidth <= 900; }
+
+    // Mobile uses the same phase-based scroll engine as desktop.
+    // No separate mobile scroll init needed.
+
+    // ===== Phase-based scroll engine (desktop + mobile) =====
+
     // Phase-based scroll with AUTO-SNAP:
     // Phase 0: Hero — user scrolls a bit, then it auto-completes
     // Phase 1: Grid HARD LOCKED — scroll is completely dead
@@ -347,14 +355,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Wheel handler
+    // Wheel handler — works at all viewport widths
     window.addEventListener('wheel', (e) => {
         if (detailOverlay && detailOverlay.classList.contains('is-active')) return;
         e.preventDefault();
         handleScroll(e.deltaY);
     }, { passive: false });
 
-    // Touch handlers
+    // Touch handlers — work at all viewport widths
     let touchStartY = 0;
     window.addEventListener('touchstart', (e) => {
         if (locked) return;
@@ -363,11 +371,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('touchmove', (e) => {
         if (detailOverlay && detailOverlay.classList.contains('is-active')) return;
-        e.preventDefault();
         const touchY = e.touches[0].clientY;
         const delta = touchStartY - touchY;
+        e.preventDefault();
         touchStartY = touchY;
-        handleScroll(delta * 2); // Scale up touch deltas
+        handleScroll(delta * 2);
     }, { passive: false });
 
     // 1. TILE CLICK TO DETAIL OVERLAY

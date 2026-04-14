@@ -861,118 +861,222 @@ body {
 }
 
 
-/* -----------------------------
-   MOBILE OPTIMIZED GRID
+/* ------------------------------
+   MOBILE — CONTINUOUS SCROLL
 ------------------------------ */
 @media (max-width: 900px) {
+
+    /* Body: locked — transitions driven by JS, same as desktop */
     body {
         overflow: hidden;
     }
 
-    .grid-container {
-        grid-template-columns: 1fr 1fr;
-        grid-template-areas: 
-            "uber-left life-of-dar"
-            "duribody nabi"
-            "ikea uber-right";
-        /* Scale vertically according to fractional constraints */
-        grid-template-rows: 1fr 1fr 1fr; 
-        gap: 2vh;
-        padding: 6vh 16px 2vh 16px;
-        height: 100vh;
-        max-height: 100vh;
+    /* Logo: centered between top & bottom card rows */
+    #persistent-logo {
+        font-size: clamp(44px, 13vw, 80px);
+        margin-top: -8px;
     }
 
-    .card-uber-left   { grid-area: uber-left; height: 100%; align-self: stretch; }
-    .card-duribody    { grid-area: duribody; height: 100%; }
-    .card-life-of-dar { grid-area: life-of-dar; height: 100%; }
-    .card-ikea        { grid-area: ikea; height: 100%; }
-    .card-uber-right  { grid-area: uber-right; height: 100%; }
-    .card-nabi        { grid-area: nabi; height: 100%; }
-
-    .card-duribody,
-    .card-life-of-dar,
-    .card-ikea,
-    .card-nabi {
-        max-height: none;
-        align-self: stretch;
-    }
-
-    .text-logo-spacer {
-        grid-area: auto;
-        font-size: clamp(50px, 15vw, 90px);
-        margin: 0;
-        z-index: 20;
-        pointer-events: none;
+    /* Logo shifts up on about/contact page */
+    #persistent-logo.logo-fixed-center {
+        top: 40%;
     }
 
     #grid-info-hint {
-        top: calc(50% + clamp(15px, 4vw, 28px));
-        font-size: 10px;
+        display: none;
     }
 
-    .overlay-title { font-size: 18px; }
-    .overlay-info { flex-direction: column; gap: 16px; }
-    .overlay-info__right { text-align: left; }
-    .overlay-gallery { grid-template-columns: 1fr; gap: 20px; }
-    .gallery-img { height: 260px; }
-    .card-overlay h2 { font-size: 24px; }
-    .card-overlay p { font-size: 13px; }
-    
-    
-    .overlay-logo-btn { font-size: 22px; }
-    .overlay-content { padding: 16px 16px 20px; }
-    .overlay-frame { border-radius: 12px; }
-    .overlay-still-img { border-radius: 12px; }
-    .overlay-info { padding: 0 2px 14px; }
-    .overlay-title { font-size: 16px; }
-    .overlay-info { flex-direction: column; gap: 12px; align-items: flex-start; }
-    .overlay-info__right { text-align: left; }
-
-    /* Persistent logo mobile */
-    #persistent-logo {
-        font-size: clamp(50px, 15vw, 90px);
+    /* Grid: frame layout — squares top/bottom, narrow columns flanking centered logo */
+    .grid-container {
+        display: grid;
+        grid-template-columns: 1.35fr 1fr 1fr 1.35fr;
+        grid-template-rows: auto 1fr auto;
+        grid-template-areas:
+            "uber-left uber-left life-of-dar life-of-dar"
+            "duribody  .         .           nabi"
+            "ikea      ikea      uber-right  uber-right";
+        gap: 8px;
+        padding: 40px 8px 40px;
+        height: 100vh;
+        height: 100svh;
     }
 
-    /* About section mobile — stacked layout */
+    .text-logo-spacer { display: none; }
+
+    .card-uber-left   { grid-area: uber-left; }
+    .card-duribody    { grid-area: duribody; }
+    .card-life-of-dar { grid-area: life-of-dar; }
+    .card-ikea        { grid-area: ikea; }
+    .card-uber-right  { grid-area: uber-right; }
+    .card-nabi        { grid-area: nabi; }
+
+    .card { max-height: none; border-radius: 16px; }
+    .card-inner { border-radius: 16px; }
+    .card-front { border-radius: 16px; }
+
+    /* Top & bottom cards: square */
+    .card-uber-left, .card-life-of-dar,
+    .card-ikea, .card-uber-right {
+        aspect-ratio: 1;
+    }
+
+    /* Middle cards: narrow columns stretching full height of center row */
+    .card-duribody, .card-nabi {
+        align-self: stretch;
+    }
+
+    .card-overlay { padding: 14px; }
+    .card-overlay h2 { font-size: 16px; }
+    .card-overlay p { font-size: 10px; }
+
+    /* About: stays fixed, single-column, no internal scroll */
     #about-section {
         grid-template-columns: 1fr;
         grid-template-rows: auto auto auto;
-        padding: 24px 20px;
-        gap: 32px;
-        align-items: start;
+        padding: 24px 20px 72px;
+        gap: 28px;
+        align-items: center;
+        overflow: hidden;
     }
+
+    #about-section.about-visible { z-index: 15; }
 
     .about-col {
         height: auto;
         padding: 0;
+        opacity: 1;
+        transform: none !important;
+        transition: none;
     }
 
-    .about-col--left {
-        padding: 0 20px 24px;
+    /* Reorder: contacts on top, logo spacer middle, about text bottom */
+    .about-col--right { order: -1; }
+    .about-col--center { order: 0; }
+    .about-col--left { order: 1; }
+
+    /* Contacts: side-by-side, compact, pushed lower */
+    .about-col--right {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: flex-start;
+        text-align: center;
         max-width: none;
         margin: 0;
-        align-items: flex-start;
+        gap: 16px;
+        padding-top: 11vh;
+    }
+
+    .contact-person {
+        flex: 1;
+        min-width: 0;
+        align-items: center;
+    }
+
+    .contact-name { font-size: 19px !important; letter-spacing: -0.02em; }
+    .contact-role { font-size: 13px !important; margin-bottom: 16px; }
+    .contact-person span,
+    .contact-person a { font-size: 13px; }
+
+    /* Center: logo spacer + NYC directly under logo — only visible on about page */
+    .about-col--center {
+        padding: 0;
+        align-items: center;
+        position: fixed;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, 0) !important;
+        margin-top: clamp(18px, 5vw, 32px);
+        z-index: 100000;
+        pointer-events: none;
+        opacity: 0 !important;
+        transition: opacity 0.5s ease !important;
+    }
+
+    #about-section.about-visible .about-col--center {
+        opacity: 1 !important;
+    }
+
+    .about-logo-spacer { display: none; }
+
+    .about-city {
+        font-size: 10px !important;
+        letter-spacing: 0.04em;
+    }
+
+    /* About text: below logo, centered + justified, pushed lower */
+    .about-col--left {
+        padding: 25vh 8px 0;
+        max-width: none;
+        margin: 0;
+        align-items: center;
     }
 
     .about-text-block {
+        max-width: 70%;
+        width: 70%;
+        margin: 0 auto;
+    }
+
+    .about-col__text {
+        font-size: 14px;
+        text-align: justify;
+        text-align-last: center;
+    }
+
+    .about-col__text--lead,
+    .about-col__text--body {
         max-width: none;
     }
 
-    .about-col--center {
-        padding: 16px 0;
-    }
-
-    .about-col--right {
-        padding-top: 0;
+    .about-tagline {
         text-align: center;
-        align-items: center;
-        max-width: none;
-        margin: 0;
-        gap: 40px;
     }
 
-    .about-logo-spacer {
-        height: clamp(50px, 12vw, 90px);
+    /* Overlay adjustments — three-column info bar like desktop */
+    .overlay-content { padding: 16px 12px 20px; justify-content: flex-start; }
+    .overlay-frame {
+        border-radius: 12px;
+        flex: 0 0 auto;
+        margin-top: 20vh;
     }
+
+    /* Multi-video pages (Duribody, Life of Dar): no extra spacing */
+    #detail-overlay.multi-video .overlay-frame {
+        margin-top: 0;
+    }
+    .overlay-still-img { border-radius: 12px; }
+
+    .overlay-info {
+        padding: 0 2px 14px;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 0;
+        position: relative;
+    }
+
+    .overlay-info__left,
+    .overlay-info__right {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .overlay-info__right { text-align: right; }
+
+    .overlay-logo-btn {
+        font-size: 20px;
+        position: absolute;
+        left: 50%;
+        top: -4px;
+        transform: translateX(-50%);
+    }
+
+    .overlay-title { font-size: 12px; }
+    .overlay-subtitle { font-size: 9px; }
+    .overlay-type { font-size: 9px; }
+    .overlay-credits { font-size: 8px; }
+    .overlay-home-label { font-size: 8px; }
+
+    #overlay-stills { gap: 8px; margin-top: 12px; }
 }
