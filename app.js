@@ -429,6 +429,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const secondaryFrame = document.getElementById('overlay-frame-secondary');
         const secondaryEmbed = document.getElementById('overlay-secondary-embed');
 
+        const loaderPrimary = document.getElementById('embed-loader-primary');
+        const loaderSecondary = document.getElementById('embed-loader-secondary');
+
         heroImg.style.display = 'none';
         heroVid.style.display = 'none';
         heroVid.src = '';
@@ -436,6 +439,9 @@ document.addEventListener('DOMContentLoaded', () => {
         heroEmbed.src = '';
         secondaryFrame.style.display = 'none';
         secondaryEmbed.src = '';
+
+        if (loaderPrimary) loaderPrimary.classList.remove('loaded');
+        if (loaderSecondary) loaderSecondary.classList.remove('loaded');
         secondaryFrame.style.width = '';
         secondaryFrame.style.height = '';
         secondaryFrame.classList.remove('has-aspect');
@@ -479,6 +485,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 sizeFrame(secondaryFrame, aspect2);
             }
             secondaryFrame.style.display = '';
+            secondaryEmbed.onload = () => { if (loaderSecondary) loaderSecondary.classList.add('loaded'); };
             secondaryEmbed.src = embed2Src + (embed2Src.includes('youtube') ? '?rel=0&modestbranding=1&color=white' : '?color=ffffff&title=0&byline=0&portrait=0');
         }
 
@@ -502,15 +509,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (embedSrc) {
             heroEmbed.style.display = 'block';
             heroEmbed.loading = 'eager';
+            heroEmbed.onload = () => { if (loaderPrimary) loaderPrimary.classList.add('loaded'); };
             const isVimeo = embedSrc.includes('vimeo');
             heroEmbed.src = isVimeo
                 ? embedSrc + '?autoplay=1&muted=1&title=0&byline=0&portrait=0'
                 : embedSrc + '?autoplay=1&rel=0&modestbranding=1&color=white';
         } else if (heroSrc.endsWith('.mp4')) {
+            if (loaderPrimary) loaderPrimary.classList.add('loaded');
             heroVid.style.display = 'block';
             heroVid.src = heroSrc;
             heroVid.play();
         } else {
+            if (loaderPrimary) loaderPrimary.classList.add('loaded');
             heroImg.style.display = '';
             heroImg.src = heroSrc;
         }

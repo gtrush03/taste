@@ -458,6 +458,35 @@ body {
     border-radius: 16px;
     overflow: hidden;
     position: relative;
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.embed-loader {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transition: opacity 0.4s ease;
+}
+
+.embed-loader.loaded {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.embed-loader-pulse {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2.5px solid rgba(196, 180, 160, 0.25);
+    border-top-color: rgba(196, 180, 160, 0.8);
+    animation: embed-spin 0.8s linear infinite;
+}
+
+@keyframes embed-spin {
+    to { transform: rotate(360deg); }
 }
 
 .overlay-frame.has-aspect {
@@ -1114,6 +1143,11 @@ body {
 
     /* Dark theme for video pages on mobile */
     #detail-overlay { background-color: #000; }
+    #detail-overlay .embed-loader-pulse {
+        border-color: rgba(255, 255, 255, 0.1);
+        border-top-color: rgba(255, 255, 255, 0.5);
+    }
+    #detail-overlay .overlay-frame { background: rgba(255, 255, 255, 0.04); }
     .overlay-logo-btn { color: #f4e7d2 !important; }
     .overlay-home-label { color: #f4e7d2 !important; }
     .overlay-title { color: #fff !important; }
