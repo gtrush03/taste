@@ -9,15 +9,20 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentCardId = null;
     let currentCardEl = null;
 
-    // Force autoplay on hero video only on first interaction
-    // Tile videos are managed by pause/resume lifecycle — not force-played globally
-    function forceHeroAutoplay() {
-        const heroBg = document.getElementById('hero-bg-video');
-        if (heroBg) { heroBg.muted = true; heroBg.setAttribute('playsinline', ''); heroBg.play().catch(() => {}); }
+    // Prime ALL videos on first user gesture — unlocks future play() calls
+    // on browsers that block autoplay until a gesture has occurred.
+    // Tile videos use HTML autoplay so they start automatically,
+    // but priming here ensures resume works after being paused.
+    function primeAutoplay() {
+        document.querySelectorAll('video').forEach(v => {
+            v.muted = true;
+            v.setAttribute('playsinline', '');
+            if (v.paused) v.play().catch(() => {});
+        });
     }
-    forceHeroAutoplay();
-    document.addEventListener('touchstart', forceHeroAutoplay, { once: true });
-    document.addEventListener('click', forceHeroAutoplay, { once: true });
+    primeAutoplay(); // attempt immediately on load (works on most browsers)
+    document.addEventListener('touchstart', primeAutoplay, { once: true });
+    document.addEventListener('click', primeAutoplay, { once: true });
     // Re-trigger on visibility change — only resume videos that should be playing
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) {
@@ -138,13 +143,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (heroProgress >= 0.99) {
             scrollHero.classList.add('hero-done');
             if (gridInfoHint) gridInfoHint.classList.add('hint-visible');
-            resumeTileVideos(); // hero done, grid is live
         } else {
             scrollHero.classList.remove('hero-done');
             if (gridInfoHint) gridInfoHint.classList.remove('hint-visible');
             if (heroProgress <= 0.6) {
                 mainGrid.classList.remove('grid-visible');
-                pauseTileVideos(); // hidden behind hero — save decode cost
             }
         }
     }
@@ -183,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let A = videoEl; // currently playing
         let B = b;       // standby ready to take over
         let swapTimer = null;
-        let isPaused = true;
+        let isPaused = false; // tiles have autoplay in HTML — treat as already playing
 
         const FADE_MS   = 220; // crossfade duration
         const BUFFER_MS = 200; // time to give B to buffer from cache before fade starts
@@ -227,6 +230,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 A.addEventListener('loadedmetadata', scheduleSwap, { once: true });
             }
         }
+
+        // Kick off seamless scheduling immediately (works with HTML autoplay)
+        startWhenReady();
 
         return {
             play() {
